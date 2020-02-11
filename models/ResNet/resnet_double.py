@@ -63,7 +63,7 @@ class BasicBlock(nn.Module):
 
         # out = self.conv2(out)
         # out = self.bn2(out)
-        out = self.doubleConv(out)
+        out = self.doubleConv2(out)
 
         if self.downsample is not None:
             identity = self.downsample(x)
@@ -230,7 +230,7 @@ def double_resnet152(pretrained=False, **kwargs):
 def demo():
     st = time.perf_counter()
     for i in range(1):
-        net = double_resnet50(num_classes=1000)
+        net = double_resnet18(num_classes=1000)
         y = net(torch.randn(2, 3, 224,224))
         print(y.size())
     print("CPU time: {}".format(time.perf_counter() - st))
@@ -243,6 +243,6 @@ def demo2():
         print(y.size())
     print("CPU time: {}".format(time.perf_counter() - st))
 
-# demo()
+demo()
 # demo2()
 
