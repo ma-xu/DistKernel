@@ -1,21 +1,23 @@
 """
 Kernel_distribution + Kernel_perturbation
-    Kernel_distribution : kaiming_normal_ init
+    Kernel_distribution : kaiming_normal_ init for each channel, channel are repeated.
+                          this may leads the var(w_c) not queals to 2/n_l, since smaples to little, e.g. 9.
     Kernel_perturbation : 0 init
 """
 
 import torch.nn as nn
 # import torch.utils.model_zoo as model_zoo
-# from torch.nn.parameter import Parameter
+from torch.nn.parameter import Parameter
 import torch
 import time
 # import torch.nn.functional as F
 # from torch.nn import init
 # from torch.autograd import Variable
 # from collections import OrderedDict
-# import math
-__all__ = ['dist_resnet18', 'dist_resnet34', 'dist_resnet50', 'dist_resnet101',
-           'dist_resnet152']
+# from torch.distributions.normal import Normal
+import math
+__all__ = ['dist2_resnet18', 'dist2_resnet34', 'dist2_resnet50', 'dist2_resnet101',
+           'dist2_resnet152']
 
 
 
@@ -147,7 +149,7 @@ class ResNet(nn.Module):
         # For DPConv init.
         for m in self.modules():
             if isinstance(m,DPConv):
-                nn.init.kaiming_normal_(m.distribution.weight, mode='fan_out', nonlinearity='relu')
+                m.distribution.weight = Parameter(self._dstribution_norm_(m.distribution.weight))
                 nn.init.constant_(m.perturbation.weight, 0)
 
         # Zero-initialize the last BN in each residual branch,
@@ -176,6 +178,15 @@ class ResNet(nn.Module):
 
         return nn.Sequential(*layers)
 
+    def _dstribution_norm_(self, tensor):
+        _,fanout = torch.nn.init._calculate_fan_in_and_fan_out(tensor)
+        gain = math.sqrt(2.0)
+        std = gain / math.sqrt(fanout)
+        # normal = Normal(loc=0.,scale=std)
+        with torch.no_grad():
+            return (tensor[0,0,:,:].normal_(0, std)).expand_as(tensor)
+
+
     def forward(self, x):
         x = self.conv1(x)
         x = self.bn1(x)
@@ -194,7 +205,7 @@ class ResNet(nn.Module):
         return x
 
 
-def dist_resnet18(pretrained=False, **kwargs):
+def dist2_resnet18(pretrained=False, **kwargs):
     """Constructs a ResNet-18 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -203,7 +214,7 @@ def dist_resnet18(pretrained=False, **kwargs):
     return model
 
 
-def dist_resnet34(pretrained=False, **kwargs):
+def dist2_resnet34(pretrained=False, **kwargs):
     """Constructs a ResNet-34 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -212,7 +223,7 @@ def dist_resnet34(pretrained=False, **kwargs):
     return model
 
 
-def dist_resnet50(pretrained=False, **kwargs):
+def dist2_resnet50(pretrained=False, **kwargs):
     """Constructs a ResNet-50 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -221,7 +232,7 @@ def dist_resnet50(pretrained=False, **kwargs):
     return model
 
 
-def dist_resnet101(pretrained=False, **kwargs):
+def dist2_resnet101(pretrained=False, **kwargs):
     """Constructs a ResNet-101 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -230,7 +241,7 @@ def dist_resnet101(pretrained=False, **kwargs):
     return model
 
 
-def dist_resnet152(pretrained=False, **kwargs):
+def dist2_resnet152(pretrained=False, **kwargs):
     """Constructs a ResNet-152 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -242,7 +253,7 @@ def dist_resnet152(pretrained=False, **kwargs):
 def demo():
     st = time.perf_counter()
     for i in range(1):
-        net = dist_resnet50(num_classes=1000)
+        net = dist2_resnet50(num_classes=1000)
         y = net(torch.randn(2, 3, 224,224))
         print(y.size())
         # for name, param in net.state_dict().items():
@@ -259,11 +270,11 @@ def demo():
 def demo2():
     st = time.perf_counter()
     for i in range(100):
-        net = dist_resnet50(num_classes=1000).cuda()
+        net = dist2_resnet50(num_classes=1000).cuda()
         y = net(torch.randn(2, 3, 224,224).cuda())
         print(y.size())
     print("CPU time: {}".format(time.perf_counter() - st))
 
-# demo()
+demo()
 # demo2()
 
