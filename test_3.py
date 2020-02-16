@@ -51,8 +51,10 @@ y = m.log_prob(mask).exp()
 y = y.permute(2,0,1).reshape(param.shape)
 
 y = -(y-F.adaptive_avg_pool2d(y,1))
-print(y)
+# print(y)
+y = math.sqrt(std/y.var())*y
 print(y.var())
+print(std)
 print(y.shape)
 
 
