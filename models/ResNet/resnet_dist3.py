@@ -67,7 +67,6 @@ class DPConv(nn.Module):
         m = MultivariateNormal(loc=self.normal_loc, scale_tril=(normal_scal).diag_embed())
         print("mask.device: {}".format(mask.device))
         print("loc.device: {}".format(m.loc.device))
-        print("m.device: {}".format(m.device))
         print("self.normal_loc.device: {}".format(self.normal_loc.device))
         y = m.log_prob(mask).exp()
 
