@@ -40,8 +40,9 @@ class DPConv(nn.Module):
         # TODO: add learnable parameters. # Done
         self.distribution_scale = Parameter(torch.ones(out_planes,in_planes,1,1))
         self.distribution_bias = Parameter(torch.zeros(out_planes, in_planes, 1, 1))
-        self.normal_loc = Parameter(torch.zeros(2),requires_grad=False)
-        self.mask = self._get_mask()
+
+        self.register_buffer('normal_loc', torch.zeros(2))
+        self.register_buffer('mask', self._get_mask())
 
 
     def forward(self, input):
@@ -72,7 +73,7 @@ class DPConv(nn.Module):
         # scale_tril = torch.ones(self.out_planes * self.in_planes, 2)
         # normal_scal = 1 * scale_tril
         m = MultivariateNormal(loc=self.normal_loc, scale_tril=(normal_scal).diag_embed())
-        print(self.mask.device)
+        # print(self.mask.device)
         y = m.log_prob(self.mask*self.distribution_zoom).exp()
 
 
