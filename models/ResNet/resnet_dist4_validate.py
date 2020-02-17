@@ -324,11 +324,11 @@ def demo():
 
 def demo2():
     st = time.perf_counter()
-    for i in range(50):
+    for i in range(1):
         net = dist4_resnet50(num_classes=1000).cuda()
         y = net(torch.randn(2, 3, 224,224).cuda())
         print(y.size())
-    print("CPU time: {}".format(time.perf_counter() - st))
+    print("GPU time: {}".format(time.perf_counter() - st))
 
 # demo()
 demo2()
