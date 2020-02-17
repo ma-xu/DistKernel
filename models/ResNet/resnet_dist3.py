@@ -65,9 +65,10 @@ class DPConv(nn.Module):
         # scale_tril = torch.ones(self.out_planes * self.in_planes, 2)
         # normal_scal = 1 * scale_tril
         m = MultivariateNormal(loc=self.normal_loc, scale_tril=(normal_scal).diag_embed())
-        y = m.log_prob(mask).exp()
         print("mask.device: {}".format(mask.device))
         print("loc.device: {}".format(m.loc.device))
+        y = m.log_prob(mask).exp()
+
 
         y = y.permute(2, 3, 0, 1)
 
