@@ -41,7 +41,7 @@ class DPConv(nn.Module):
         self.distribution_scale = Parameter(torch.ones(out_planes,in_planes,1,1))
         self.distribution_bias = Parameter(torch.zeros(out_planes, in_planes, 1, 1))
         self.normal_loc = Parameter(torch.zeros(2),requires_grad=False)
-
+        self.mask = self._get_mask()
 
 
     def forward(self, input):
@@ -65,16 +65,14 @@ class DPConv(nn.Module):
         mask = (self.perturbation.weight[0, 0, :, :] != -999).nonzero()
         mask = mask.reshape(self.k, self.k, 2)
         mask = mask.unsqueeze(dim=2).unsqueeze(dim=2) - self.k // 2  # assume square, lazy.
-        return mask*self.distribution_zoom
+        return mask
 
     def _init_distribution(self):
-        mask = self._get_mask()
-
         normal_scal = self.distribution_var.expand((self.out_planes , self.in_planes, 2))
         # scale_tril = torch.ones(self.out_planes * self.in_planes, 2)
         # normal_scal = 1 * scale_tril
         m = MultivariateNormal(loc=self.normal_loc, scale_tril=(normal_scal).diag_embed())
-        y = m.log_prob(mask).exp()
+        y = m.log_prob(self.mask*self.distribution_zoom).exp()
 
 
         y = y.permute(2, 3, 0, 1)
