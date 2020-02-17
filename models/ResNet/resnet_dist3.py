@@ -29,47 +29,58 @@ class DPConv(nn.Module):
         self.in_planes = in_planes
         self.out_planes = out_planes
         self.k = k
+        self.stride = stride
         self.perturbation = nn.Conv2d(in_planes, out_planes, kernel_size=k, stride=stride,
                               padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(out_planes)
         self.bn2 = nn.BatchNorm2d(out_planes)
 
-        self.distribution_zoom = Parameter(torch.ones(out_planes))
+        self.distribution_zoom = Parameter(torch.ones(1)) # for mask size [-1,0,1]*zoom
+        self.distribution_var = Parameter(torch.ones(out_planes,in_planes,1)) # for normal distribution variance.
         # TODO: add learnable parameters.
+        self.distribution_scale = Parameter(torch.ones(out_planes,in_planes,1,1))
+        self.distribution_bias = Parameter(torch.zeros(out_planes, in_planes, 1, 1))
+        self.normal_loc = torch.zeros(2)
 
 
-        self.mask = self._get_mask()
 
     def forward(self, input):
-        print(self.mask)
+        # print(self.mask)
         param = self._init_distribution()
         distribution_out = self._distribution_conv(input,param)
 
-        return self.bn1(self.distribution(input))+self.bn2(self.perturbation(input))
+        return self.bn1(distribution_out)+self.bn2(self.perturbation(input))
 
     def _get_mask(self):
         mask = (self.perturbation.weight[0, 0, :, :] != -999).nonzero()
         mask = mask.reshape(self.k, self.k, 2)
-        mask = mask.unsqueeze(dim=2) - self.k // 2  # assume square, lazy.
-        return mask
+        mask = mask.unsqueeze(dim=2).unsqueeze(dim=2) - self.k // 2  # assume square, lazy.
+        return mask*self.distribution_zoom
 
     def _init_distribution(self):
         mask = self._get_mask()
-        normal_loc = torch.zeros(2)
-        std = math.sqrt(2) / math.sqrt(self.out_planes * self.k * self.k)
-        scale_tril = torch.ones(self.out_planes * self.in_planes, 2)
-        normal_scal = 1 * scale_tril
-        m = MultivariateNormal(loc=normal_loc, scale_tril=(normal_scal).diag_embed())
-        y = m.log_prob(mask).exp()
-        y = y.permute(2, 0, 1).reshape((self.out_planes,self.in_planes,self.k,self.k))
 
-        y = -(y - F.adaptive_avg_pool2d(y, 1))
-        y = math.sqrt(std / y.var()) * y
+
+        normal_scal = self.distribution_var.expand((self.out_planes , self.in_planes, 2))
+        # scale_tril = torch.ones(self.out_planes * self.in_planes, 2)
+        # normal_scal = 1 * scale_tril
+        m = MultivariateNormal(loc=self.normal_loc, scale_tril=(normal_scal).diag_embed())
+        y = m.log_prob(mask).exp()
+        y = y.permute(2, 3, 0, 1)
+
+
+        if self.distribution_zoom == 1:
+            y = -(y - F.adaptive_avg_pool2d(y, 1))
+            std = math.sqrt(2) / math.sqrt(self.out_planes * self.k * self.k)
+            y = math.sqrt(std / y.var())*y
+        else:
+            y = -(y - self.distribution_bias)
+            y = self.distribution_scale * y
         return  y
 
-    def _distribution_conv(self,input, weight, stride=1,bias=None,
+    def _distribution_conv(self,input, weight,bias=None,
                  padding=1, dilation=1, groups=1):
-        stride = _pair(stride)
+        stride = _pair(self.stride)
         padding = _pair(padding)
         dilation = _pair(dilation)
         return F.conv2d(input, weight, bias, stride,
@@ -310,12 +321,12 @@ def demo():
 
 def demo2():
     st = time.perf_counter()
-    for i in range(100):
+    for i in range(50):
         net = dist3_resnet50(num_classes=1000).cuda()
         y = net(torch.randn(2, 3, 224,224).cuda())
         print(y.size())
     print("CPU time: {}".format(time.perf_counter() - st))
 
 demo()
-# demo2()
+demo2()
 
