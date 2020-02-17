@@ -72,6 +72,7 @@ class DPConv(nn.Module):
         # scale_tril = torch.ones(self.out_planes * self.in_planes, 2)
         # normal_scal = 1 * scale_tril
         m = MultivariateNormal(loc=self.normal_loc, scale_tril=(normal_scal).diag_embed())
+        print(self.mask.device)
         y = m.log_prob(self.mask*self.distribution_zoom).exp()
 
 
@@ -336,6 +337,6 @@ def demo2():
         print(y.size())
     print("GPU time: {}".format(time.perf_counter() - st))
 
-# demo()
+demo()
 demo2()
 
