@@ -37,7 +37,7 @@ class DPConv(nn.Module):
 
         self.distribution_zoom = Parameter(torch.ones(1)) # for mask size [-1,0,1]*zoom
         self.distribution_var = Parameter(torch.ones(out_planes,in_planes,1)) # for normal distribution variance.
-        # TODO: add learnable parameters.
+        # TODO: add learnable parameters. # Done
         self.distribution_scale = Parameter(torch.ones(out_planes,in_planes,1,1))
         self.distribution_bias = Parameter(torch.zeros(out_planes, in_planes, 1, 1))
         self.normal_loc = Parameter(torch.zeros(2),requires_grad=False)
@@ -60,14 +60,10 @@ class DPConv(nn.Module):
     def _init_distribution(self):
         mask = self._get_mask()
 
-
         normal_scal = self.distribution_var.expand((self.out_planes , self.in_planes, 2))
         # scale_tril = torch.ones(self.out_planes * self.in_planes, 2)
         # normal_scal = 1 * scale_tril
         m = MultivariateNormal(loc=self.normal_loc, scale_tril=(normal_scal).diag_embed())
-        print("mask.device: {}".format(mask.device))
-        print("loc.device: {}".format(m.loc.device))
-        print("self.normal_loc.device: {}".format(self.normal_loc.device))
         y = m.log_prob(mask).exp()
 
 
@@ -332,6 +328,6 @@ def demo2():
         print(y.size())
     print("CPU time: {}".format(time.perf_counter() - st))
 
-demo()
-demo2()
+# demo()
+# demo2()
 

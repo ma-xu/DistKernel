@@ -5,5 +5,6 @@ from .resnet_ac import *
 from .resnet_double import *
 from .resnet_triple import *
 from .resnet_dist import *
+from .resnet_dist3 import *
 
 
