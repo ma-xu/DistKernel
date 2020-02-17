@@ -335,5 +335,5 @@ def demo2():
     print("GPU time: {}".format(time.perf_counter() - st))
 
 # demo()
-# demo2()
+demo2()
 
