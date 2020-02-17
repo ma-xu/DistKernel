@@ -23,6 +23,6 @@ for k, v in check_point['state_dict'].items():
         print("{} : {}".format(k,v))
     # if "distribution_var" in k:
     #     print("{} : {}".format(k,v))
-    if "normal_loc" in k:
-        print("{} : {}".format(k,v))
+    # if "normal_loc" in k:
+    #     print("{} : {}".format(k,v))
 
