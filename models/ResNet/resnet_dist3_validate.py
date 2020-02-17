@@ -46,14 +46,19 @@ class DPConv(nn.Module):
 
     def forward(self, input):
         # print(self.mask)
-        st = time.perf_counter()
-        for i in range(50):
-            param = self._init_distribution()
-        print("param time: {}".format(time.perf_counter() - st))
-        st = time.perf_counter()
-        for i in range(50):
-            distribution_out = self._distribution_conv(input,param)
-        print("distribution_out time: {}".format(time.perf_counter() - st))
+        with torch.autograd.profiler.profile(use_cuda=True) as prof:
+            st = time.perf_counter()
+            for i in range(50):
+                param = self._init_distribution()
+            print("param time: {}".format(time.perf_counter() - st))
+        print(prof)
+
+        with torch.autograd.profiler.profile(use_cuda=True) as prof:
+            st = time.perf_counter()
+            for i in range(50):
+                distribution_out = self._distribution_conv(input,param)
+            print("distribution_out time: {}".format(time.perf_counter() - st))
+        print(prof)
 
         return self.bn1(distribution_out)+self.bn2(self.perturbation(input))
 
