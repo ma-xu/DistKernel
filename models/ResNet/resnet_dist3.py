@@ -40,7 +40,7 @@ class DPConv(nn.Module):
         # TODO: add learnable parameters.
         self.distribution_scale = Parameter(torch.ones(out_planes,in_planes,1,1))
         self.distribution_bias = Parameter(torch.zeros(out_planes, in_planes, 1, 1))
-        self.normal_loc = torch.zeros(2)
+        self.normal_loc = Parameter(torch.zeros(2),requires_grad=False)
 
 
 
