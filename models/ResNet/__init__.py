@@ -6,5 +6,5 @@ from .resnet_double import *
 from .resnet_triple import *
 from .resnet_dist import *
 from .resnet_dist4 import *
-
+from .resnet_dist5 import *
 
