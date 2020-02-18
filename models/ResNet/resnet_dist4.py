@@ -70,7 +70,7 @@ class DPConv(nn.Module):
     def _init_distribution(self):
         # self.distribution_std
         y = (1.0/(self.distribution_std*math.sqrt(2*math.pi)))\
-            *torch.exp(-(self.mask*self.distribution_zoom**2)/(2*self.distribution_std**2))
+            *torch.exp(-((self.mask*self.distribution_zoom)**2)/(2*(self.distribution_std**2)))
         y = y.permute(2, 3, 0, 1)
         return y
 
@@ -324,6 +324,6 @@ def demo2():
         print(y.size())
     print("CPU time: {}".format(time.perf_counter() - st))
 
-# demo()
+demo()
 # demo2()
 

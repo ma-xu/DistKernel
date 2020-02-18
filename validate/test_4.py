@@ -15,12 +15,16 @@ import math
 # print(B.var())
 
 
-path = "/Users/melody/Downloads/checkpoint.pth.tar"
+path = "/Users/melody/Downloads/checkpoint_dist4.pth.tar"
 check_point = torch.load(path,map_location='cpu')
 
+print(check_point['best_prec1'])
+exit()
+
 for k, v in check_point['state_dict'].items():
-    if "distribution_zoom" in k:
-        print("{} : {}".format(k,v))
+    if "distribution_std" in k:
+        # print("{} : {}".format(k,v))
+        print(v.data)
     # if "distribution_var" in k:
     #     print("{} : {}".format(k,v))
     # if "normal_loc" in k:
