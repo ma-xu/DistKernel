@@ -15,14 +15,14 @@ import math
 # print(B.var())
 
 
-path = "/Users/melody/Downloads/checkpoint_dist4.pth.tar"
+path = "/Users/melody/Downloads/model_best.pth.tar"
 check_point = torch.load(path,map_location='cpu')
 
-print(check_point['best_prec1'])
-exit()
+# print(check_point['best_prec1'])
+# exit()
 
 for k, v in check_point['state_dict'].items():
-    if "distribution_std" in k:
+    if "distribution_scale" in k:
         # print("{} : {}".format(k,v))
         print(v.data)
     # if "distribution_var" in k:
