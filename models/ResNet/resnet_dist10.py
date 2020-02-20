@@ -68,7 +68,7 @@ class DPConv(nn.Module):
             *torch.exp(-((self.mask*self.distribution_zoom)**2)/(2*(std**2)))
         y = y.permute(2, 3, 0, 1)
         y_copy = y.reshape(self.out_planes,-1,1,1)
-        y = (y-y_copy.mean(dim=1))/(y_copy.std(dim=1)+1e-5)
+        y = (y-y_copy.mean(dim=1,keepdim=True))/(y_copy.std(dim=1,keepdim=True)+1e-5)
         y = self.distribution_scale * y + self.distribution_bias
 
         return y
@@ -301,7 +301,7 @@ def dist10_resnet152(pretrained=False, **kwargs):
 def demo():
     st = time.perf_counter()
     for i in range(1):
-        net = dist10_resnet50(num_classes=1000)
+        net = dist10_resnet18(num_classes=1000)
         y = net(torch.randn(2, 3, 224,224))
         print(y.size())
         # for name, param in net.state_dict().items():
