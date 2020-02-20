@@ -8,3 +8,4 @@ from .resnet_dist import *
 from .resnet_dist4 import *
 from .resnet_dist5 import *
 from .resnet_dist6 import *
+from .resnet_dist7 import *

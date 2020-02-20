@@ -1,8 +1,5 @@
 """
-Kernel_distribution + Kernel_perturbation
-    Kernel_distribution : kaiming_normal_ init for each channel, channel are repeated.
-                          this may leads the var(w_c) not queals to 2/n_l, since smaples to little, e.g. 9.
-    Kernel_perturbation : 0 init
+similar to dist6, but 2-dim normal distribution., different std.
 """
 
 import torch.nn as nn
@@ -18,8 +15,8 @@ from torch.nn.modules.utils import _pair
 # from collections import OrderedDict
 # from torch.distributions.normal import Normal
 import math
-__all__ = ['dist6_resnet18', 'dist6_resnet34', 'dist6_resnet50', 'dist6_resnet101',
-           'dist6_resnet152']
+__all__ = ['dist7__resnet18', 'dist7__resnet34', 'dist7__resnet50', 'dist7__resnet101',
+           'dist7__resnet152']
 
 
 
@@ -36,8 +33,10 @@ class DPConv(nn.Module):
         self.bn2 = nn.BatchNorm2d(out_planes)
 
         self.register_buffer('mask', self._get_mask())
-        self.distribution_zoom = Parameter(torch.ones(1,1,self.out_planes,self.in_planes)) # for mask size [-1,0,1]*zoom
-        self.distribution_std = Parameter(0.001*torch.ones(out_planes,in_planes)) # for normal distribution variance.
+        self.distribution_zoom1 = Parameter(torch.ones(1,1,self.out_planes,self.in_planes))
+        self.distribution_zoom2 = Parameter(torch.ones(1,1,self.out_planes,self.in_planes))# for mask size [-1,0,1]*zoom
+        self.distribution_std1 = Parameter(0.1 * torch.ones(out_planes,in_planes)) # for normal distribution variance.
+        self.distribution_std2 = Parameter(0.1 * torch.ones(out_planes, in_planes))
         self.distribution_bias = Parameter(torch.zeros(out_planes, in_planes, 1, 1))
         self.distribution_scale = Parameter(torch.zeros(self.out_planes,self.in_planes,1,1))
 
@@ -54,17 +53,22 @@ class DPConv(nn.Module):
     def _get_mask(self):
         # assume square and odd number, because lazy.
         y = torch.arange(0, self.k) - self.k // 2 + 0.0
-        y1 = y.reshape(self.k, 1).expand((self.k, self.k))
-        y2 = y.reshape(1, self.k).expand((self.k, self.k))
-        mask = torch.sqrt(y1.pow(2) + y2.pow(2))
+        y1 = y.reshape(self.k, 1,1).expand((self.k, self.k,1))
+        y2 = y.reshape(1, self.k,1).expand((self.k, self.k,1))
+        mask = torch.cat((y1,y2),dim=-1)
         return mask.unsqueeze(dim=-1).unsqueeze(dim=-1)
 
 
     def _init_distribution(self):
         # self.distribution_std
-        std = F.relu(self.distribution_std)+1e-5
-        y = -(1.0/(std*math.sqrt(2*math.pi)))\
-            *torch.exp(-((self.mask*self.distribution_zoom)**2)/(2*(std**2)))
+        std1 = F.relu(self.distribution_std1)+1e-5
+        std2 = F.relu(self.distribution_std2) + 1e-5
+        y = -(1.0/(std1*std2*2*math.pi))*\
+            torch.exp(
+                -(self.mask[:,:,0,:,:]*self.distribution_zoom1)/(2*std1*std1)
+                - (self.mask[:,:,1,:,:]*self.distribution_zoom2)/(2*std2*std2)
+            )
+            # *torch.exp(-((self.mask*self.distribution_zoom)**2)/(2*(std**2)))
         y = y.permute(2, 3, 0, 1)
         y = self.distribution_scale * y + self.distribution_bias
         return y
@@ -249,7 +253,7 @@ class ResNet(nn.Module):
         return x
 
 
-def dist6_resnet18(pretrained=False, **kwargs):
+def dist7__resnet18(pretrained=False, **kwargs):
     """Constructs a ResNet-18 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -258,7 +262,7 @@ def dist6_resnet18(pretrained=False, **kwargs):
     return model
 
 
-def dist6_resnet34(pretrained=False, **kwargs):
+def dist7__resnet34(pretrained=False, **kwargs):
     """Constructs a ResNet-34 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -267,7 +271,7 @@ def dist6_resnet34(pretrained=False, **kwargs):
     return model
 
 
-def dist6_resnet50(pretrained=False, **kwargs):
+def dist7__resnet50(pretrained=False, **kwargs):
     """Constructs a ResNet-50 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -276,7 +280,7 @@ def dist6_resnet50(pretrained=False, **kwargs):
     return model
 
 
-def dist6_resnet101(pretrained=False, **kwargs):
+def dist7__resnet101(pretrained=False, **kwargs):
     """Constructs a ResNet-101 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -285,7 +289,7 @@ def dist6_resnet101(pretrained=False, **kwargs):
     return model
 
 
-def dist6_resnet152(pretrained=False, **kwargs):
+def dist7__resnet152(pretrained=False, **kwargs):
     """Constructs a ResNet-152 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -297,7 +301,7 @@ def dist6_resnet152(pretrained=False, **kwargs):
 def demo():
     st = time.perf_counter()
     for i in range(1):
-        net = dist6_resnet50(num_classes=1000)
+        net = dist7__resnet50(num_classes=1000)
         y = net(torch.randn(2, 3, 224,224))
         print(y.size())
         # for name, param in net.state_dict().items():
@@ -314,7 +318,7 @@ def demo():
 def demo2():
     st = time.perf_counter()
     for i in range(50):
-        net = dist6_resnet50(num_classes=1000).cuda()
+        net = dist7__resnet50(num_classes=1000).cuda()
         y = net(torch.randn(2, 3, 224,224).cuda())
         print(y.size())
     print("CPU time: {}".format(time.perf_counter() - st))
