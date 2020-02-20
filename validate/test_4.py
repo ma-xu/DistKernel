@@ -34,14 +34,13 @@ print(y.size())
 # print(check_point['best_prec1'])
 # exit()
 
-# for k, v in check_point['state_dict'].items():
-#     if "distribution_scale" in k:
-#         # print("{} : {}".format(k,v))
-#         # print(v.data)
-#         print(v.shape)
-#         print(v.mean())
-#     # if "distribution_var" in k:
-#     #     print("{} : {}".format(k,v))
-#     # if "normal_loc" in k:
+for k, v in check_point['state_dict'].items():
+    if "distribution_std" in k:
+        # print("{} : {}".format(k,v))
+        # print(v.data)
+        print(v.mean())
+    # if "distribution_var" in k:
+    #     print("{} : {}".format(k,v))
+    # if "normal_loc" in k:
     #     print("{} : {}".format(k,v))
 
