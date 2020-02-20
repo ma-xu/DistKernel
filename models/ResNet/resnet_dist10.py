@@ -67,8 +67,8 @@ class DPConv(nn.Module):
         y = -(1.0/(std*math.sqrt(2*math.pi)))\
             *torch.exp(-((self.mask*self.distribution_zoom)**2)/(2*(std**2)))
         y = y.permute(2, 3, 0, 1)
-        y_copy = y.reshape(self.out_planes,-1,1,1)
-        y = (y-y_copy.mean(dim=1,keepdim=True))/(y_copy.std(dim=1,keepdim=True)+1e-5)
+        y_copy = y.reshape(self.out_planes,self.in_planes,-1,1)
+        y = (y-y_copy.mean(dim=2,keepdim=True))/(y_copy.std(dim=2,keepdim=True)+1e-5)
         y = self.distribution_scale * y + self.distribution_bias
 
         return y
@@ -323,6 +323,6 @@ def demo2():
         print(y.size())
     print("CPU time: {}".format(time.perf_counter() - st))
 
-demo()
+# demo()
 # demo2()
 
