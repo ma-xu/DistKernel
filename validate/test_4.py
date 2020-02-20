@@ -7,6 +7,8 @@ from torch.nn.parameter import Parameter
 import numpy as np
 import torch.nn.functional as F
 import math
+import models as models
+
 
 
 # A =torch.rand(1,10,10)
@@ -15,20 +17,31 @@ import math
 # print(A.var())
 # print(B.var())
 
-
-path = "/Users/melody/Downloads/epoch63checkpoint.pth.tar"
+model = models.__dict__['dist5_resnet18']()
+path = "/Users/melody/Downloads/epoch96checkpoint.pth.tar"
 check_point = torch.load(path,map_location='cpu')
+new_check_point = OrderedDict()
+
+for k, v in check_point['state_dict'].items():
+    # name = k[7:]  # remove `module.`
+    name = k[7:]  # remove `module.1.`
+    new_check_point[name] = v
+model.load_state_dict(new_check_point)
+
+y = model(torch.randn(2, 3, 224,224))
+print(y.size())
 
 # print(check_point['best_prec1'])
 # exit()
 
-for k, v in check_point['state_dict'].items():
-    if "distribution_std" in k:
-        # print("{} : {}".format(k,v))
-        # print(v.data)
-        print(abs(v).min())
-    # if "distribution_var" in k:
-    #     print("{} : {}".format(k,v))
-    # if "normal_loc" in k:
+# for k, v in check_point['state_dict'].items():
+#     if "distribution_scale" in k:
+#         # print("{} : {}".format(k,v))
+#         # print(v.data)
+#         print(v.shape)
+#         print(v.mean())
+#     # if "distribution_var" in k:
+#     #     print("{} : {}".format(k,v))
+#     # if "normal_loc" in k:
     #     print("{} : {}".format(k,v))
 
