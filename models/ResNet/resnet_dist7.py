@@ -65,8 +65,8 @@ class DPConv(nn.Module):
         std2 = F.relu(self.distribution_std2) + 1e-5
         y = -(1.0/(std1*std2*2*math.pi))*\
             torch.exp(
-                -(self.mask[:,:,0,:,:]*self.distribution_zoom1)/(2*std1*std1)
-                - (self.mask[:,:,1,:,:]*self.distribution_zoom2)/(2*std2*std2)
+                -((self.mask[:,:,0,:,:]*self.distribution_zoom1)**2)/(2*std1*std1)
+                -((self.mask[:,:,1,:,:]*self.distribution_zoom2)**2)/(2*std2*std2)
             )
             # *torch.exp(-((self.mask*self.distribution_zoom)**2)/(2*(std**2)))
         y = y.permute(2, 3, 0, 1)
