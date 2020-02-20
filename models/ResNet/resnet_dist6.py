@@ -62,7 +62,8 @@ class DPConv(nn.Module):
 
     def _init_distribution(self):
         # self.distribution_std
-        std = F.relu(self.distribution_std)+1e-5
+        # We use abs instead of ReLU to preserve gradient.
+        std = abs(self.distribution_std)+1e-5
         y = -(1.0/(std*math.sqrt(2*math.pi)))\
             *torch.exp(-((self.mask*self.distribution_zoom)**2)/(2*(std**2)))
         y = y.permute(2, 3, 0, 1)
