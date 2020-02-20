@@ -37,7 +37,7 @@ class DPConv(nn.Module):
 
         self.register_buffer('mask', self._get_mask())
         self.distribution_zoom = Parameter(torch.ones(1,1,self.out_planes,self.in_planes)) # for mask size [-1,0,1]*zoom
-        self.distribution_std = Parameter(0.001*torch.ones(out_planes,in_planes)) # for normal distribution variance.
+        self.distribution_std = Parameter(torch.ones(out_planes,in_planes)) # for normal distribution variance.
         self.distribution_bias = Parameter(torch.zeros(out_planes, in_planes, 1, 1))
         self.distribution_scale = Parameter(torch.zeros(self.out_planes,self.in_planes,1,1))
 
@@ -67,7 +67,8 @@ class DPConv(nn.Module):
         y = -(1.0/(std*math.sqrt(2*math.pi)))\
             *torch.exp(-((self.mask*self.distribution_zoom)**2)/(2*(std**2)))
         y = y.permute(2, 3, 0, 1)
-        y = (y-y.mean())/(y.std()+1e-5)
+        y_copy = y.reshape(self.out_planes,-1,1,1)
+        y = (y-y_copy.mean(dim=1))/(y_copy.std(dim=1)+1e-5)
         y = self.distribution_scale * y + self.distribution_bias
 
         return y
