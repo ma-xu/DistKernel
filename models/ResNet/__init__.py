@@ -10,5 +10,4 @@ from .resnet_dist5 import *
 from .resnet_dist6 import *
 from .resnet_dist7 import *
 from .resnet_dist8 import *
-from .resnet_dist9 import *
-from .resnet_dist10 import *
+
