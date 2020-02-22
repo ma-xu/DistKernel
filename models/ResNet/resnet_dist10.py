@@ -1,7 +1,7 @@
 """
 Kernel_distribution + Kernel_perturbation
-    Kernel_distribution : var: 1/N_l mean:0
-    Kernel_perturbation : kaiming_ var: 1/N_l mean:0
+    Kernel_distribution : var: 2/N_l mean:0
+    Kernel_perturbation : kaiming_ var: 2/N_l mean:0
 """
 
 import torch.nn as nn
@@ -72,7 +72,7 @@ class DPConv(nn.Module):
         return y
 
     def _get_init_scale(self):
-        kaiming_var = 1/(self.out_planes*self.k*self.k)
+        kaiming_var = 2/(self.out_planes*self.k*self.k)
         std = abs(self.distribution_std) + 1e-5
         y = -(1.0 / (std * math.sqrt(2 * math.pi))) \
             * torch.exp(-((self.mask * self.distribution_zoom) ** 2) / (2 * (std ** 2)))
@@ -201,10 +201,10 @@ class ResNet(nn.Module):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
 
-        # For DPConv init.
-        for m in self.modules():
-            if isinstance(m,DPConv):
-                nn.init.kaiming_normal_(m.perturbation.weight, mode='fan_out', nonlinearity='linear')
+        # # For DPConv init.
+        # for m in self.modules():
+        #     if isinstance(m,DPConv):
+        #         nn.init.kaiming_normal_(m.perturbation.weight, mode='fan_out', nonlinearity='linear')
 
         # Zero-initialize the last BN in each residual branch,
         # so that the residual branch starts with zeros, and each residual block behaves like an identity.
