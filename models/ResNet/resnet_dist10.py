@@ -17,8 +17,8 @@ from torch.nn.modules.utils import _pair
 # from collections import OrderedDict
 # from torch.distributions.normal import Normal
 import math
-__all__ = ['dist9_resnet18', 'dist9_resnet34', 'dist9_resnet50', 'dist9_resnet101',
-           'dist9_resnet152']
+__all__ = ['dist10_resnet18', 'dist10_resnet34', 'dist10_resnet50', 'dist10_resnet101',
+           'dist10_resnet152']
 
 
 
@@ -259,7 +259,7 @@ class ResNet(nn.Module):
         return x
 
 
-def dist9_resnet18(pretrained=False, **kwargs):
+def dist10_resnet18(pretrained=False, **kwargs):
     """Constructs a ResNet-18 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -268,7 +268,7 @@ def dist9_resnet18(pretrained=False, **kwargs):
     return model
 
 
-def dist9_resnet34(pretrained=False, **kwargs):
+def dist10_resnet34(pretrained=False, **kwargs):
     """Constructs a ResNet-34 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -277,7 +277,7 @@ def dist9_resnet34(pretrained=False, **kwargs):
     return model
 
 
-def dist9_resnet50(pretrained=False, **kwargs):
+def dist10_resnet50(pretrained=False, **kwargs):
     """Constructs a ResNet-50 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -286,7 +286,7 @@ def dist9_resnet50(pretrained=False, **kwargs):
     return model
 
 
-def dist9_resnet101(pretrained=False, **kwargs):
+def dist10_resnet101(pretrained=False, **kwargs):
     """Constructs a ResNet-101 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -295,7 +295,7 @@ def dist9_resnet101(pretrained=False, **kwargs):
     return model
 
 
-def dist9_resnet152(pretrained=False, **kwargs):
+def dist10_resnet152(pretrained=False, **kwargs):
     """Constructs a ResNet-152 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -307,7 +307,7 @@ def dist9_resnet152(pretrained=False, **kwargs):
 def demo():
     st = time.perf_counter()
     for i in range(1):
-        net = dist9_resnet50(num_classes=1000)
+        net = dist10_resnet50(num_classes=1000)
         y = net(torch.randn(2, 3, 224,224))
         print(y.size())
         # for name, param in net.state_dict().items():
@@ -324,7 +324,7 @@ def demo():
 def demo2():
     st = time.perf_counter()
     for i in range(50):
-        net = dist9_resnet50(num_classes=1000).cuda()
+        net = dist10_resnet50(num_classes=1000).cuda()
         y = net(torch.randn(2, 3, 224,224).cuda())
         print(y.size())
     print("CPU time: {}".format(time.perf_counter() - st))
