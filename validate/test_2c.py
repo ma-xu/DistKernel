@@ -1,5 +1,6 @@
 import torch
 from collections import OrderedDict
+import torchvision.models
 
 data = torch.rand(1,3,5,5)
 conv1 = torch.nn.Conv2d(3,6,3,padding=1,stride=1)
