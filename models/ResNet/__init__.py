@@ -13,3 +13,5 @@ from .resnet_dist8 import *
 from .resnet_dist9 import *
 from .resnet_dist10 import *
 
+from .resnet_group1 import *
+from .resnet_group1 import *
