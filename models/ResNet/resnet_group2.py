@@ -8,8 +8,8 @@ import time
 # from torch.autograd import Variable
 # from collections import OrderedDict
 # import math
-__all__ = ['group2__resnet18', 'group2__resnet34', 'group2__resnet50', 'group2__resnet101',
-           'group2__resnet152']
+__all__ = ['group2_resnet18', 'group2_resnet34', 'group2_resnet50', 'group2_resnet101',
+           'group2_resnet152']
 
 class AssConv(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=1, dilation=1, groups=[1],bias=False):
@@ -179,7 +179,7 @@ class ResNet(nn.Module):
         return x
 
 
-def group2__resnet18(pretrained=False, **kwargs):
+def group2_resnet18(pretrained=False, **kwargs):
     """Constructs a ResNet-18 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -188,7 +188,7 @@ def group2__resnet18(pretrained=False, **kwargs):
     return model
 
 
-def group2__resnet34(pretrained=False, **kwargs):
+def group2_resnet34(pretrained=False, **kwargs):
     """Constructs a ResNet-34 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -197,7 +197,7 @@ def group2__resnet34(pretrained=False, **kwargs):
     return model
 
 
-def group2__resnet50(pretrained=False, **kwargs):
+def group2_resnet50(pretrained=False, **kwargs):
     """Constructs a ResNet-50 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -206,7 +206,7 @@ def group2__resnet50(pretrained=False, **kwargs):
     return model
 
 
-def group2__resnet101(pretrained=False, **kwargs):
+def group2_resnet101(pretrained=False, **kwargs):
     """Constructs a ResNet-101 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -215,7 +215,7 @@ def group2__resnet101(pretrained=False, **kwargs):
     return model
 
 
-def group2__resnet152(pretrained=False, **kwargs):
+def group2_resnet152(pretrained=False, **kwargs):
     """Constructs a ResNet-152 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -227,7 +227,7 @@ def group2__resnet152(pretrained=False, **kwargs):
 def demo():
     st = time.perf_counter()
     for i in range(1):
-        net = group2__resnet50(num_classes=1000)
+        net = group2_resnet50(num_classes=1000)
         y = net(torch.randn(2, 3, 224,224))
         print(y.size())
     print("CPU time: {}".format(time.perf_counter() - st))
@@ -235,7 +235,7 @@ def demo():
 def demo2():
     st = time.perf_counter()
     for i in range(1):
-        net = group2__resnet50(num_classes=1000).cuda()
+        net = group2_resnet50(num_classes=1000).cuda()
         y = net(torch.randn(2, 3, 224,224).cuda())
         print(y.size())
     print("CPU time: {}".format(time.perf_counter() - st))
