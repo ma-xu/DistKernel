@@ -15,3 +15,6 @@ from .resnet_dist10 import *
 
 from .resnet_group1 import *
 from .resnet_group2 import *
+from .resnet_group3 import *
+from .resnet_group4 import *
+from .resnet_dilate1 import *
