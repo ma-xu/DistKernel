@@ -18,3 +18,6 @@ from .resnet_group2 import *
 from .resnet_group3 import *
 from .resnet_group4 import *
 from .resnet_dilate1 import *
+from .resnet_combine1 import *
+from .resnet_combine2 import *
+from .resnet_double2 import *
