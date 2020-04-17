@@ -8,21 +8,30 @@ import time
 # from torch.autograd import Variable
 # from collections import OrderedDict
 import math
-__all__ = ['double2_resnet18', 'double2_resnet34', 'double2_resnet50', 'double2_resnet101',
-           'double2_resnet152']
+__all__ = ['combine3_resnet18', 'combine3_resnet34', 'combine3_resnet50', 'combine3_resnet101',
+           'combine3_resnet152']
 
 class AssConv(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=1, bias=False):
+    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=1, dilation=1, groups=1,bias=False):
         super(AssConv, self).__init__()
         self.ori_conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=bias)
-        self.new_conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=bias)
-
+        self.dilate_conv = nn.Conv2d(in_channels, out_channels, math.ceil(kernel_size/2),
+                                     stride, padding, dilation=2, bias=bias)
+        self.group4_conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, groups=4, bias=bias)
+        self.group8_conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, groups=8, bias=bias)
         self.ori_bn =  nn.BatchNorm2d(out_channels)
-        self.new_bn = nn.BatchNorm2d(out_channels)
+        self.dilate_bn = nn.BatchNorm2d(out_channels)
+        self.group4_bn = nn.BatchNorm2d(out_channels)
+        self.group8_bn = nn.BatchNorm2d(out_channels)
+        self.second_conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=bias)
+        self.second_bn = nn.BatchNorm2d(out_channels)
 
 
     def forward(self, input):
-        return self.ori_bn(self.ori_conv(input))+self.new_bn(self.new_conv(input))
+        return self.ori_bn(self.ori_conv(input))+self.group4_bn(self.group4_conv(input))\
+               +self.group8_bn(self.group8_conv(input))+self.dilate_bn(self.dilate_conv(input))\
+               +self.second_bn(self.second_conv(input))
+
 
 
 
@@ -175,7 +184,7 @@ class ResNet(nn.Module):
         return x
 
 
-def double2_resnet18(pretrained=False, **kwargs):
+def combine3_resnet18(pretrained=False, **kwargs):
     """Constructs a ResNet-18 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -184,7 +193,7 @@ def double2_resnet18(pretrained=False, **kwargs):
     return model
 
 
-def double2_resnet34(pretrained=False, **kwargs):
+def combine3_resnet34(pretrained=False, **kwargs):
     """Constructs a ResNet-34 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -193,7 +202,7 @@ def double2_resnet34(pretrained=False, **kwargs):
     return model
 
 
-def double2_resnet50(pretrained=False, **kwargs):
+def combine3_resnet50(pretrained=False, **kwargs):
     """Constructs a ResNet-50 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -202,7 +211,7 @@ def double2_resnet50(pretrained=False, **kwargs):
     return model
 
 
-def double2_resnet101(pretrained=False, **kwargs):
+def combine3_resnet101(pretrained=False, **kwargs):
     """Constructs a ResNet-101 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -211,7 +220,7 @@ def double2_resnet101(pretrained=False, **kwargs):
     return model
 
 
-def double2_resnet152(pretrained=False, **kwargs):
+def combine3_resnet152(pretrained=False, **kwargs):
     """Constructs a ResNet-152 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -223,7 +232,7 @@ def double2_resnet152(pretrained=False, **kwargs):
 def demo():
     st = time.perf_counter()
     for i in range(1):
-        net = double2_resnet18(num_classes=1000)
+        net = combine3_resnet18(num_classes=1000)
         y = net(torch.randn(2, 3, 224,224))
         print(y.size())
     print("CPU time: {}".format(time.perf_counter() - st))
@@ -231,7 +240,7 @@ def demo():
 def demo2():
     st = time.perf_counter()
     for i in range(1):
-        net = double2_resnet50(num_classes=1000).cuda()
+        net = combine3_resnet50(num_classes=1000).cuda()
         y = net(torch.randn(2, 3, 224,224).cuda())
         print(y.size())
     print("CPU time: {}".format(time.perf_counter() - st))

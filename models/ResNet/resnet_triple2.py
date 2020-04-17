@@ -8,21 +8,24 @@ import time
 # from torch.autograd import Variable
 # from collections import OrderedDict
 import math
-__all__ = ['double2_resnet18', 'double2_resnet34', 'double2_resnet50', 'double2_resnet101',
-           'double2_resnet152']
+__all__ = ['triple2_resnet18', 'triple2_resnet34', 'triple2_resnet50', 'triple2_resnet101',
+           'triple2_resnet152']
 
 class AssConv(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=1, bias=False):
         super(AssConv, self).__init__()
         self.ori_conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=bias)
         self.new_conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=bias)
+        self.triple_conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=bias)
 
         self.ori_bn =  nn.BatchNorm2d(out_channels)
         self.new_bn = nn.BatchNorm2d(out_channels)
+        self.triple_bn = nn.BatchNorm2d(out_channels)
 
 
     def forward(self, input):
-        return self.ori_bn(self.ori_conv(input))+self.new_bn(self.new_conv(input))
+        return self.ori_bn(self.ori_conv(input))+\
+               self.new_bn(self.new_conv(input))+self.triple_bn(self.triple_conv(input))
 
 
 
@@ -175,7 +178,7 @@ class ResNet(nn.Module):
         return x
 
 
-def double2_resnet18(pretrained=False, **kwargs):
+def triple2_resnet18(pretrained=False, **kwargs):
     """Constructs a ResNet-18 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -184,7 +187,7 @@ def double2_resnet18(pretrained=False, **kwargs):
     return model
 
 
-def double2_resnet34(pretrained=False, **kwargs):
+def triple2_resnet34(pretrained=False, **kwargs):
     """Constructs a ResNet-34 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -193,7 +196,7 @@ def double2_resnet34(pretrained=False, **kwargs):
     return model
 
 
-def double2_resnet50(pretrained=False, **kwargs):
+def triple2_resnet50(pretrained=False, **kwargs):
     """Constructs a ResNet-50 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -202,7 +205,7 @@ def double2_resnet50(pretrained=False, **kwargs):
     return model
 
 
-def double2_resnet101(pretrained=False, **kwargs):
+def triple2_resnet101(pretrained=False, **kwargs):
     """Constructs a ResNet-101 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -211,7 +214,7 @@ def double2_resnet101(pretrained=False, **kwargs):
     return model
 
 
-def double2_resnet152(pretrained=False, **kwargs):
+def triple2_resnet152(pretrained=False, **kwargs):
     """Constructs a ResNet-152 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -223,7 +226,7 @@ def double2_resnet152(pretrained=False, **kwargs):
 def demo():
     st = time.perf_counter()
     for i in range(1):
-        net = double2_resnet18(num_classes=1000)
+        net = triple2_resnet18(num_classes=1000)
         y = net(torch.randn(2, 3, 224,224))
         print(y.size())
     print("CPU time: {}".format(time.perf_counter() - st))
@@ -231,7 +234,7 @@ def demo():
 def demo2():
     st = time.perf_counter()
     for i in range(1):
-        net = double2_resnet50(num_classes=1000).cuda()
+        net = triple2_resnet50(num_classes=1000).cuda()
         y = net(torch.randn(2, 3, 224,224).cuda())
         print(y.size())
     print("CPU time: {}".format(time.perf_counter() - st))
