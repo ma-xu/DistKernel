@@ -21,5 +21,6 @@ from .resnet_dilate1 import *
 from .resnet_combine1 import *
 from .resnet_combine2 import *
 from .resnet_double2 import *
+from .resnet_double3 import *
 from .resnet_triple2 import *
 from .resnet_combine3 import *
