@@ -24,3 +24,4 @@ from .resnet_double2 import *
 from .resnet_double3 import *
 from .resnet_triple2 import *
 from .resnet_combine3 import *
+from .resnet_combine4 import *
