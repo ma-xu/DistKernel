@@ -25,3 +25,6 @@ from .resnet_double3 import *
 from .resnet_triple2 import *
 from .resnet_combine3 import *
 from .resnet_combine4 import *
+from .resnet_combine5 import *
+from .resnet_validat1 import *
+from .resnet_validat2 import *
