@@ -28,3 +28,5 @@ from .resnet_combine4 import *
 from .resnet_combine5 import *
 from .resnet_validat1 import *
 from .resnet_validat2 import *
+from .resnet_combine6 import *
+from .resnet_combine7 import *
