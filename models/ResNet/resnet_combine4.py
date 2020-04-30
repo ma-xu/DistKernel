@@ -41,6 +41,8 @@ class AssConv(nn.Module):
         all_out = torch.cat([ori_out,second_out,dilate_out,group_out],dim=1)
         all_gap = all_out.mean(dim=-1,keepdim=False).mean(dim=-1,keepdim=True)
 
+        # If the GAP really affects the fusion of weights???
+        # To be answered.
         weight_gap = self.fc(all_gap).unsqueeze(dim=-1)
         weight_gap = weight_gap.softmax(dim=1)
         out = weight_gap*all_out
