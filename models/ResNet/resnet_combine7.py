@@ -267,6 +267,6 @@ def demo2():
         print(y.size())
     print("CPU time: {}".format(time.perf_counter() - st))
 
-demo()
+# demo()
 # demo2()
 
