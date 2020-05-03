@@ -33,17 +33,18 @@ class AssConv(nn.Module):
 
 
     def forward(self, input):
+        # N*1*C*H*W
         ori_out = self.ori_bn(self.ori_conv(input)).unsqueeze(dim=1)
         second_out = self.second_bn(self.second_conv(input)).unsqueeze(dim=1)
         dilate_out = self.dilate_bn(self.dilate_conv(input)).unsqueeze(dim=1)
         group_out = self.group_bn(self.group_conv(input)).unsqueeze(dim=1)
 
-        all_out = torch.cat([ori_out,second_out,dilate_out,group_out],dim=1)
-        all_gap = all_out.mean(dim=-1,keepdim=False).mean(dim=-1,keepdim=True)
+        all_out = torch.cat([ori_out,second_out,dilate_out,group_out],dim=1)  # N*4*C*H*W
+        all_gap = all_out.mean(dim=-1,keepdim=False).mean(dim=-1,keepdim=True) # N*4*C*1
 
         # If the GAP really affects the fusion of weights???
         # To be answered.
-        weight_gap = self.fc(all_gap).unsqueeze(dim=-1)
+        weight_gap = self.fc(all_gap).unsqueeze(dim=-1) # N*4*C*1*1
         weight_gap = weight_gap.softmax(dim=1)
         out = weight_gap*all_out
         out = out.sum(dim=1,keepdim=False)
