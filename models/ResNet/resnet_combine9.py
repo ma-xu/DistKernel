@@ -23,7 +23,7 @@ class AssConv(nn.Module):
         self.dilate_bn = nn.BatchNorm2d(out_channels)
         self.group_bn = nn.BatchNorm2d(out_channels)
         self.second_bn = nn.BatchNorm2d(out_channels)
-        self.register_buffer('temp', torch.ones([1,in_channels,1,1]))
+        self.register_buffer('temp', torch.ones([1,in_channels,7,7]))
 
         self.fc = nn.Sequential(
             nn.Conv2d(4, 2, 1, bias=False),
@@ -41,16 +41,15 @@ class AssConv(nn.Module):
 
         all_out = torch.cat([ori_out,second_out,dilate_out,group_out],dim=1) #N*4*C_out*W*H
 
-        temp = self.temp.expand_as(input) # N*C_in*W*H
-        ori_temp_out = self.ori_bn(self.ori_conv(temp)).unsqueeze(dim=1) # N*1*C_out*W*H
-        second_temp_out = self.second_bn(self.second_conv(temp)).unsqueeze(dim=1) # N*1*C_out*W*H
-        dilate_temp_out = self.dilate_bn(self.dilate_conv(temp)).unsqueeze(dim=1) # N*1*C_out*W*H
-        group_temp_out = self.group_bn(self.group_conv(temp)).unsqueeze(dim=1) # N*1*C_out*W*H
-        all_temp_out = torch.cat([ori_temp_out, second_temp_out, dilate_temp_out, group_temp_out], dim=1) # N*4*C_out*W*H
-        all_temp_gap = all_temp_out.mean(dim=-1, keepdim=False).mean(dim=-1, keepdim=True)  # N*4*C_out*1
+        ori_temp_out = self.ori_bn(self.ori_conv(self.temp)).unsqueeze(dim=1) # 1*1*C_out*7*7
+        second_temp_out = self.second_bn(self.second_conv(self.temp)).unsqueeze(dim=1) # 1*1*C_out*7*7
+        dilate_temp_out = self.dilate_bn(self.dilate_conv(self.temp)).unsqueeze(dim=1) # 1*1*C_out*7*7
+        group_temp_out = self.group_bn(self.group_conv(self.temp)).unsqueeze(dim=1) # 1*1*C_out*7*7
+        all_temp_out = torch.cat([ori_temp_out, second_temp_out, dilate_temp_out, group_temp_out], dim=1) # 1*4*C_out*7*7
+        all_temp_gap = all_temp_out.mean(dim=-1, keepdim=False).mean(dim=-1, keepdim=True)  # 1*4*C_out*1
 
-        alpha = self.fc(all_temp_gap).unsqueeze(dim=-1) # N*4*C_out*1*1
-        alpha = alpha.softmax(dim=1) # N*4*C_out*1*1
+        alpha = self.fc(all_temp_gap).unsqueeze(dim=-1) # 1*4*C_out*1*1
+        alpha = alpha.softmax(dim=1) # 1*4*C_out*1*1
         out = alpha*all_out # N*4*C_out*W*H
         out = out.sum(dim=1,keepdim=False) # N*C_out*W*H
         return out
