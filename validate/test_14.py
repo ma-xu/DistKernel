@@ -27,8 +27,8 @@ def fuse(conv, bn):
 class DummyModule(nn.Module):
     def __init__(self):
         super(DummyModule, self).__init__()
-        self.conv1 = nn.Conv2d(in_channels=3, out_channels=16, kernel_size=3, padding=1, bias = True)
-        self.bn1 = nn.BatchNorm2d(16)
+        self.conv1 = nn.Conv2d(in_channels=3, out_channels=6, kernel_size=3, padding=1, bias = True)
+        self.bn1 = nn.BatchNorm2d(6)
 
         self.fuse1 = fuse(self.conv1, self.bn1)
 
@@ -41,8 +41,10 @@ class DummyModule(nn.Module):
 
 def test_net():
     model = DummyModule()
-    model.eval()
-    p = torch.randn([1, 3, 8, 8])
+    # Caused by .eval(). See: 
+
+    # model.eval()
+    p = torch.randn([1, 3, 5, 5])
     import time
     s = time.time()
     o_output = model(p)
