@@ -33,3 +33,4 @@ from .resnet_combine7 import *
 from .resnet_combine8 import *
 from .resnet_combine9 import *
 from .resnet_combine10 import *
+from .resnet_combine11 import *

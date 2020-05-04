@@ -3,19 +3,25 @@ import torch.nn as nn
 # from torch.nn.parameter import Parameter
 import torch
 import time
+from torch.nn.modules.utils import _single, _pair, _triple
 # import torch.nn.functional as F
 # from torch.nn import init
 # from torch.autograd import Variable
 # from collections import OrderedDict
 import math
-__all__ = ['combine9_resnet18', 'combine9_resnet34', 'combine9_resnet50', 'combine9_resnet101',
-           'combine9_resnet152']
+__all__ = ['combine11_resnet18', 'combine11_resnet34', 'combine11_resnet50', 'combine11_resnet101',
+           'combine11_resnet152']
 
 
 ### FAIL!!! Due to the BN mean/avg
 class AssConv(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=1, dilation=1, groups=1,bias=False):
         super(AssConv, self).__init__()
+        self.stride = stride
+        self.padding = padding
+        self.group = out_channels//32
+        self.dilate = 2
+
         self.ori_conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=bias)
         self.second_conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=bias)
         self.dilate_conv = nn.Conv2d(in_channels, out_channels, math.ceil(kernel_size/2),
@@ -25,7 +31,7 @@ class AssConv(nn.Module):
         self.dilate_bn = nn.BatchNorm2d(out_channels)
         self.group_bn = nn.BatchNorm2d(out_channels)
         self.second_bn = nn.BatchNorm2d(out_channels)
-        self.register_buffer('temp', torch.ones([1,in_channels,7,7]))
+        self.register_buffer('temp', torch.ones([1,in_channels,kernel_size,kernel_size]))
 
         self.fc = nn.Sequential(
             nn.Conv2d(4, 2, 1, bias=False),
@@ -43,14 +49,30 @@ class AssConv(nn.Module):
 
         all_out = torch.cat([ori_out,second_out,dilate_out,group_out],dim=1) #N*4*C_out*W*H
 
-        ori_temp_out = self.ori_bn(self.ori_conv(self.temp)).unsqueeze(dim=1) # 1*1*C_out*7*7
-        second_temp_out = self.second_bn(self.second_conv(self.temp)).unsqueeze(dim=1) # 1*1*C_out*7*7
-        dilate_temp_out = self.dilate_bn(self.dilate_conv(self.temp)).unsqueeze(dim=1) # 1*1*C_out*7*7
-        group_temp_out = self.group_bn(self.group_conv(self.temp)).unsqueeze(dim=1) # 1*1*C_out*7*7
-        all_temp_out = torch.cat([ori_temp_out, second_temp_out, dilate_temp_out, group_temp_out], dim=1) # 1*4*C_out*7*7
-        all_temp_gap = all_temp_out.mean(dim=-1, keepdim=False).mean(dim=-1, keepdim=True)  # 1*4*C_out*1
 
-        alpha = self.fc(all_temp_gap).unsqueeze(dim=-1) # 1*4*C_out*1*1
+
+        ori_temp_out = nn.functional.conv2d(self.temp,weight=self.ori_conv.weight.clone(),stride=_pair(self.stride))
+        ori_temp_out = self.ori_bn.weight.clone().view_as(ori_temp_out)*ori_temp_out\
+                       +self.ori_bn.bias.clone().view_as(ori_temp_out)
+
+        second_temp_out = nn.functional.conv2d(self.temp, weight=self.second_conv.weight.clone(), stride=_pair(self.stride))
+        second_temp_out = self.second_bn.weight.clone().view_as(second_temp_out) * second_temp_out \
+                       + self.second_bn.bias.clone().view_as(second_temp_out)
+
+        dilate_temp_out = nn.functional.conv2d(self.temp, weight=self.dilate_conv.weight.clone(),
+                                               stride=_pair(self.stride),dilation=_pair(self.dilate))
+        dilate_temp_out = self.dilate_bn.weight.clone().view_as(dilate_temp_out) * dilate_temp_out \
+                          + self.dilate_bn.bias.clone().view_as(dilate_temp_out)
+
+        group_temp_out = nn.functional.conv2d(self.temp, weight=self.group_conv.weight.clone(),
+                                               groups=self.group)
+        group_temp_out = self.group_bn.weight.clone().view_as(group_temp_out) * group_temp_out \
+                          + self.group_bn.bias.clone().view_as(group_temp_out)
+
+        all_temp_out = torch.cat([ori_temp_out, second_temp_out, dilate_temp_out, group_temp_out],
+                                 dim=0).unsqueeze(dim=0).squeeze(dim=-1)
+
+        alpha = self.fc(all_temp_out).unsqueeze(dim=-1) # 1*4*C_out*1*1
         alpha = alpha.softmax(dim=1) # 1*4*C_out*1*1
         out = alpha*all_out # N*4*C_out*W*H
         out = out.sum(dim=1,keepdim=False) # N*C_out*W*H
@@ -215,7 +237,7 @@ class ResNet(nn.Module):
         return x
 
 
-def combine9_resnet18(pretrained=False, **kwargs):
+def combine11_resnet18(pretrained=False, **kwargs):
     """Constructs a ResNet-18 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -224,7 +246,7 @@ def combine9_resnet18(pretrained=False, **kwargs):
     return model
 
 
-def combine9_resnet34(pretrained=False, **kwargs):
+def combine11_resnet34(pretrained=False, **kwargs):
     """Constructs a ResNet-34 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -233,7 +255,7 @@ def combine9_resnet34(pretrained=False, **kwargs):
     return model
 
 
-def combine9_resnet50(pretrained=False, **kwargs):
+def combine11_resnet50(pretrained=False, **kwargs):
     """Constructs a ResNet-50 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -242,7 +264,7 @@ def combine9_resnet50(pretrained=False, **kwargs):
     return model
 
 
-def combine9_resnet101(pretrained=False, **kwargs):
+def combine11_resnet101(pretrained=False, **kwargs):
     """Constructs a ResNet-101 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -251,7 +273,7 @@ def combine9_resnet101(pretrained=False, **kwargs):
     return model
 
 
-def combine9_resnet152(pretrained=False, **kwargs):
+def combine11_resnet152(pretrained=False, **kwargs):
     """Constructs a ResNet-152 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -263,7 +285,7 @@ def combine9_resnet152(pretrained=False, **kwargs):
 def demo():
     st = time.perf_counter()
     for i in range(1):
-        net = combine9_resnet18(num_classes=1000)
+        net = combine11_resnet18(num_classes=1000)
         y = net(torch.randn(2, 3, 224,224))
         print(y.size())
     print("CPU time: {}".format(time.perf_counter() - st))
@@ -271,7 +293,7 @@ def demo():
 def demo2():
     st = time.perf_counter()
     for i in range(1):
-        net = combine9_resnet50(num_classes=1000).cuda()
+        net = combine11_resnet50(num_classes=1000).cuda()
         y = net(torch.randn(2, 3, 224,224).cuda())
         print(y.size())
     print("CPU time: {}".format(time.perf_counter() - st))
