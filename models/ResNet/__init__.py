@@ -35,3 +35,4 @@ from .resnet_combine9 import *
 from .resnet_combine10 import *
 from .resnet_combine11 import *
 from .resnet_combine12 import *
+from .resnet_validate3 import *
