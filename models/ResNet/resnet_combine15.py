@@ -8,8 +8,8 @@ import time
 # from torch.autograd import Variable
 # from collections import OrderedDict
 import math
-__all__ = ['combine14_resnet18', 'combine14_resnet34', 'combine14_resnet50', 'combine14_resnet101',
-           'combine14_resnet152']
+__all__ = ['combine15_resnet18', 'combine15_resnet34', 'combine15_resnet50', 'combine15_resnet101',
+           'combine15_resnet152']
 
 class AssConv(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=1, dilation=1, groups=1,bias=False):
@@ -218,7 +218,7 @@ class ResNet(nn.Module):
         return x
 
 
-def combine14_resnet18(pretrained=False, **kwargs):
+def combine15_resnet18(pretrained=False, **kwargs):
     """Constructs a ResNet-18 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -227,7 +227,7 @@ def combine14_resnet18(pretrained=False, **kwargs):
     return model
 
 
-def combine14_resnet34(pretrained=False, **kwargs):
+def combine15_resnet34(pretrained=False, **kwargs):
     """Constructs a ResNet-34 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -236,7 +236,7 @@ def combine14_resnet34(pretrained=False, **kwargs):
     return model
 
 
-def combine14_resnet50(pretrained=False, **kwargs):
+def combine15_resnet50(pretrained=False, **kwargs):
     """Constructs a ResNet-50 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -245,7 +245,7 @@ def combine14_resnet50(pretrained=False, **kwargs):
     return model
 
 
-def combine14_resnet101(pretrained=False, **kwargs):
+def combine15_resnet101(pretrained=False, **kwargs):
     """Constructs a ResNet-101 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -254,7 +254,7 @@ def combine14_resnet101(pretrained=False, **kwargs):
     return model
 
 
-def combine14_resnet152(pretrained=False, **kwargs):
+def combine15_resnet152(pretrained=False, **kwargs):
     """Constructs a ResNet-152 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -266,7 +266,7 @@ def combine14_resnet152(pretrained=False, **kwargs):
 def demo():
     st = time.perf_counter()
     for i in range(1):
-        net = combine14_resnet18(num_classes=1000)
+        net = combine15_resnet18(num_classes=1000)
         y = net(torch.randn(2, 3, 224,224))
         print(y.size())
     print("CPU time: {}".format(time.perf_counter() - st))
@@ -274,7 +274,7 @@ def demo():
 def demo2():
     st = time.perf_counter()
     for i in range(1):
-        net = combine14_resnet50(num_classes=1000).cuda()
+        net = combine15_resnet50(num_classes=1000).cuda()
         y = net(torch.randn(2, 3, 224,224).cuda())
         print(y.size())
     print("CPU time: {}".format(time.perf_counter() - st))
