@@ -40,3 +40,4 @@ from .resnet_dist10 import *
 from .resnet_se import *
 from .resnet_combine14 import *
 from .resnet_combine15 import *
+from .resnet_combine16 import *
