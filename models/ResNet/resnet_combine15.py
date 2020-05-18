@@ -1,6 +1,6 @@
 import torch.nn as nn
 # import torch.utils.model_zoo as model_zoo
-# from torch.nn.parameter import Parameter
+from torch.nn.parameter import Parameter
 import torch
 import time
 # import torch.nn.functional as F
@@ -24,13 +24,12 @@ class AssConv(nn.Module):
         self.group_bn = nn.BatchNorm2d(out_channels)
         self.second_bn = nn.BatchNorm2d(out_channels)
 
-        self.fc = nn.Sequential(
-            nn.Conv2d(out_channels,out_channels//16,1,bias=False),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(out_channels//16,out_channels, 1, bias=False),
-            nn.Sigmoid()
-        )
+        # part2
+        self.groups = 64
         self.gap = nn.AdaptiveAvgPool2d(1)
+        self.weight = Parameter(torch.zeros(1, groups, 1, 1))
+        self.bias = Parameter(torch.ones(1, groups, 1, 1))
+        self.sig = nn.Sigmoid()
 
 
     def forward(self, input):
@@ -39,13 +38,26 @@ class AssConv(nn.Module):
         second_out = self.second_bn(self.second_conv(input))
         dilate_out = self.dilate_bn(self.dilate_conv(input))
         group_out = self.group_bn(self.group_conv(input))
-
         all_out = ori_out+second_out+dilate_out+group_out
 
-        #SE part
-        out = all_out*self.fc(self.gap(all_out))
+        #SGE part
+        b, c, h, w = all_out.size()
+        all_out = all_out.view(b * self.groups, -1, h, w)
+        all_out_new = all_out * self.gap(all_out)
+        all_out_new = all_out_new.sum(dim=1, keepdim=True)
+        t = all_out_new.view(b * self.groups, -1)
+        t = t - t.mean(dim=1, keepdim=True)
+        std = t.std(dim=1, keepdim=True) + 1e-5
+        t = t / std
+        t = t.view(b, self.groups, h, w)
+        t = t * self.weight + self.bias
+        t = t.view(b * self.groups, 1, h, w)
+        all_out = all_out * self.sig(t)
+        all_out = all_out.view(b, c, h, w)
 
-        return out
+
+
+        return all_out
 
 
 
