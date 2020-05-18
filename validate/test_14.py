@@ -43,7 +43,7 @@ def test_net():
     model = DummyModule()
     # Caused by .eval(). See: 
 
-    model.eval()
+    # model.eval()
     p = torch.randn([1, 3, 5, 5])
     import time
     s = time.time()
