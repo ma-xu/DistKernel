@@ -43,3 +43,4 @@ from .resnet_combine15 import *
 from .resnet_combine16 import *
 from .resnet_combine17 import *
 from .resnet_validate4 import *
+from .resnet_validate5 import *
