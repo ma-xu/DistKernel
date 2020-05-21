@@ -23,14 +23,6 @@ class AssConv(nn.Module):
         self.bn3 = nn.BatchNorm2d(out_channels)
         self.bn4 = nn.BatchNorm2d(out_channels)
 
-        self.fc = nn.Sequential(
-            nn.Linear(in_channels,in_channels//4),
-            nn.ReLU(inplace=True),
-            nn.Linear(in_channels//4, 4),
-            nn.Softmax(dim=1)
-        )
-        self.gap = nn.AdaptiveAvgPool2d(1)
-
 
     def forward(self, input):
         out_1 = self.bn1(self.conv1(input)).unsqueeze(dim=1)
