@@ -24,10 +24,12 @@ class AssConv(nn.Module):
         self.group_bn = nn.BatchNorm2d(out_channels)
         self.second_bn = nn.BatchNorm2d(out_channels)
 
-        self.fc = nn.Sequential(
-            nn.Linear(in_channels, in_channels // 4),
+        self.refine = nn.Sequential(
+            nn.Conv1d(in_channels, in_channels ,kernel_size=2,groups=in_channels),
             nn.ReLU(inplace=True),
-            nn.Linear(in_channels // 4, 4),
+            nn.Conv1d(in_channels, in_channels//4, kernel_size=1),
+            nn.ReLU(inplace=True),
+            nn.Conv1d(in_channels//4, 4, kernel_size=1),
             nn.Softmax(dim=1)
         )
 
@@ -41,10 +43,14 @@ class AssConv(nn.Module):
         group_out = self.group_bn(self.group_conv(input)).unsqueeze(dim=1)
 
         all_out = torch.cat([ori_out,second_out,dilate_out,group_out],dim=1)  # N*4*C*H*W
-        gap = input.mean(dim=-1,keepdim=False).mean(dim=-1,keepdim=False)
 
-        weight_gap = self.fc(gap).unsqueeze(dim=-1).unsqueeze(dim=-1).unsqueeze(dim=-1) # N*4*C*1*1
-        out = weight_gap*all_out
+
+        b,c,h,w = input.size()
+        gap = input.view(b,c,-1).mean(dim=-1,keepdim=True)
+        std = input.view(b,c,-1).std(dim=-1,keepdim=True)
+        stat = torch.cat([gap,std],dim=-1)
+        weight = self.refine(stat).unsqueeze(-1).unsqueeze(-1)
+        out = weight*all_out
         out = out.sum(dim=1,keepdim=False)
         return out
 
