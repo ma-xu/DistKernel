@@ -38,6 +38,7 @@ from .resnet_dist10 import *
 # from .resnet_combine13 import *
 # from .resnet_validate3 import *
 from .resnet_se import *
+from .resnet_ge import *
 from .resnet_combine14 import *
 from .resnet_combine15 import *
 from .resnet_combine16 import *
