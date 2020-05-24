@@ -261,7 +261,7 @@ def combine20_resnet152(pretrained=False, **kwargs):
 def demo():
     st = time.perf_counter()
     for i in range(1):
-        net = combine20_resnet18(num_classes=1000)
+        net = combine20_resnet50(num_classes=1000)
         y = net(torch.randn(2, 3, 224,224))
         print(y.size())
     print("CPU time: {}".format(time.perf_counter() - st))

@@ -4,5 +4,6 @@ from .ResNet import *
 from .VGG import *
 from .DenseNet import *
 from .AlexNet import *
+from .ResNeSt import *
 
 
