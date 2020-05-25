@@ -52,3 +52,4 @@ from .resnet_validate6 import *
 
 from .resnet_new1 import *
 from .resnet_new2 import *
+from .resnet_new3 import *
