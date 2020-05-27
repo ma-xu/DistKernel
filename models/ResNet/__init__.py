@@ -39,17 +39,19 @@ from .resnet_dist10 import *
 # from .resnet_validate3 import *
 from .resnet_se import *
 from .resnet_ge import *
-from .resnet_combine14 import *
-from .resnet_combine15 import *
-from .resnet_combine16 import *
-from .resnet_combine17 import *
-from .resnet_combine18 import *
-from .resnet_combine19 import *
-from .resnet_combine20 import *
-from .resnet_validate4 import *
-from .resnet_validate5 import *
-from .resnet_validate6 import *
+# from .resnet_combine14 import *
+# from .resnet_combine15 import *
+# from .resnet_combine16 import *
+# from .resnet_combine17 import *
+# from .resnet_combine18 import *
+# from .resnet_combine19 import *
+# from .resnet_combine20 import *
+# from .resnet_validate4 import *
+# from .resnet_validate5 import *
+# from .resnet_validate6 import *
 
 from .resnet_new1 import *
 from .resnet_new2 import *
 from .resnet_new3 import *
+from .resnet_new1_se import *
+from .resnet_new3_se import *
