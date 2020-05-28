@@ -281,9 +281,9 @@ def demo1(image_paths, target_layer, arch, topk, output_dir, cuda,checkpoint,dis
             save_gradcam(
                 filename=osp.join(
                     output_dir,
-                    "{}-{}-gradcam-{}.png".format(
+                    "{}-{}-{}.png".format(
                         # j, arch, target_layer, classes[ids[j, i]]   image_path
-                        image_paths[j], arch, target_layer
+                        osp.splitext(image_paths[j])[0], arch, target_layer
                     ),
                 ),
                 gcam=regions[j, 0],
