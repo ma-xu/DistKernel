@@ -56,3 +56,4 @@ from .resnet_new3 import *
 from .resnet_new1_se import *
 from .resnet_new3_se import *
 from.resnet_lottery import *
+from.resnet_lottery2 import *
