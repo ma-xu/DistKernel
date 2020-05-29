@@ -75,14 +75,7 @@ class AssConv(nn.Module):
         super(AssConv, self).__init__()
         self.ori_conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=bias)
         self.new_conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=bias)
-        if kernel_size>1:
-            self.ac_convbn = ACBlock(in_channels, out_channels, kernel_size, stride, padding)
-        else:
-            self.ac_convbn = nn.Sequential(
-                nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=bias),
-                nn.BatchNorm2d(out_channels)
-            )
-
+        self.ac_convbn = ACBlock(in_channels,out_channels,kernel_size,stride,padding)
         self.group_conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, groups=64, bias=bias)
 
         self.ori_bn =  nn.BatchNorm2d(out_channels)
@@ -104,6 +97,34 @@ class AssConv(nn.Module):
         group_out = self.group_bn(self.group_conv(input)).unsqueeze(dim=1)
 
         all_out = torch.cat([ori_out, new_out, ac_out, group_out], dim=1)
+
+        gap = input.mean(dim=-1).mean(dim=-1)
+        weights = self.fc(gap).unsqueeze(dim=-1).unsqueeze(dim=-1).unsqueeze(dim=-1)
+
+        out = weights * all_out
+        out = out.sum(dim=1, keepdim=False)
+        return out
+
+class DoubleConv(nn.Module):
+    def __init__(self, in_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False):
+        super(DoubleConv, self).__init__()
+        self.ori_conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=bias)
+        self.new_conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=bias)
+        self.ori_bn =  nn.BatchNorm2d(out_channels)
+        self.new_bn = nn.BatchNorm2d(out_channels)
+
+        self.fc = nn.Sequential(
+            nn.Linear(in_channels, in_channels // 16),
+            nn.ReLU(inplace=True),
+            nn.Linear(in_channels // 16, 2),
+            nn.Softmax(dim=1)
+        )
+
+    def forward(self, input):
+        ori_out = self.ori_bn(self.ori_conv(input)).unsqueeze(dim=1)
+        new_out = self.new_bn(self.new_conv(input)).unsqueeze(dim=1)
+
+        all_out = torch.cat([ori_out, new_out], dim=1)
 
         gap = input.mean(dim=-1).mean(dim=-1)
         weights = self.fc(gap).unsqueeze(dim=-1).unsqueeze(dim=-1).unsqueeze(dim=-1)
@@ -161,11 +182,11 @@ class Bottleneck(nn.Module):
 
     def __init__(self, inplanes, planes, stride=1, downsample=None):
         super(Bottleneck, self).__init__()
-        self.conv1 = AssConv(inplanes, planes,kernel_size=1,padding=0)
+        self.conv1 = DoubleConv(inplanes, planes)
         # self.bn1 = nn.BatchNorm2d(planes)
         self.conv2 = AssConv(planes, planes, kernel_size=3, stride=stride, padding=1, bias=False)
         # self.bn2 = nn.BatchNorm2d(planes)
-        self.conv3 = AssConv(planes, planes * self.expansion,kernel_size=1,padding=0)
+        self.conv3 = DoubleConv(planes, planes * self.expansion)
         # self.bn3 = nn.BatchNorm2d(planes * self.expansion)
         self.relu = nn.ReLU(inplace=True)
         self.downsample = downsample
