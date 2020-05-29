@@ -53,6 +53,7 @@ from .resnet_ge import *
 from .resnet_new1 import *
 from .resnet_new2 import *
 from .resnet_new3 import *
+from .resnet_new4 import *
 from .resnet_new1_se import *
 from .resnet_new3_se import *
 from.resnet_lottery import *
