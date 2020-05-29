@@ -113,25 +113,10 @@ class DoubleConv(nn.Module):
         self.ori_bn =  nn.BatchNorm2d(out_channels)
         self.new_bn = nn.BatchNorm2d(out_channels)
 
-        self.fc = nn.Sequential(
-            nn.Linear(in_channels, in_channels // 16),
-            nn.ReLU(inplace=True),
-            nn.Linear(in_channels // 16, 2),
-            nn.Softmax(dim=1)
-        )
-
     def forward(self, input):
-        ori_out = self.ori_bn(self.ori_conv(input)).unsqueeze(dim=1)
-        new_out = self.new_bn(self.new_conv(input)).unsqueeze(dim=1)
-
-        all_out = torch.cat([ori_out, new_out], dim=1)
-
-        gap = input.mean(dim=-1).mean(dim=-1)
-        weights = self.fc(gap).unsqueeze(dim=-1).unsqueeze(dim=-1).unsqueeze(dim=-1)
-
-        out = weights * all_out
-        out = out.sum(dim=1, keepdim=False)
-        return out
+        ori_out = self.ori_bn(self.ori_conv(input))
+        new_out = self.new_bn(self.new_conv(input))
+        return ori_out+new_out
 
 
 def conv3x3(in_planes, out_planes, stride=1):
