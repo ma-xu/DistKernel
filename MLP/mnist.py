@@ -7,6 +7,7 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
 from Model1 import Model1
+from PDA import PDA
 
 
 def train(args, model, device, train_loader, optimizer, epoch):
@@ -54,6 +55,7 @@ def main():
                         help='number of epochs to train (default: 14)')
     parser.add_argument('--lr', type=float, default=1.0, metavar='LR',
                         help='learning rate (default: 1.0)')
+    parser.add_argument('--model', default='Model1', type=str)
     parser.add_argument('--gamma', type=float, default=0.7, metavar='M',
                         help='Learning rate step gamma (default: 0.7)')
     parser.add_argument('--no-cuda', action='store_true', default=False,
@@ -87,7 +89,16 @@ def main():
                        ])),
         batch_size=args.test_batch_size, shuffle=True, **kwargs)
 
-    model = Model1().to(device)
+    if args.model == 'PDA':
+        model = Model1().to(device)
+        print("Using PDA")
+    elif args.model == 'PDB':
+        model = Model1().to(device)
+        print("Using PDB")
+    else:
+        model = Model1().to(device)
+        print("Using Model1")
+
     optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
 
     scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
