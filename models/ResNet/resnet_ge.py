@@ -283,9 +283,16 @@ def ge_resnet152(pretrained=False, **kwargs):
 
 
 
-def demo():
-    net = ge_resnet18(num_classes=1000)
-    y = net(torch.randn(1, 3, 224,224))
-    print(y.size())
-
+def mean_letency():
+    import time
+    net = ge_resnet50(num_classes=1000)
+    x = torch.randn(1, 3, 224,224)
+    for i in range(10):
+        y = net(x)
+    st = time.perf_counter()
+    for i in range(50):
+        y = net(x)
+    period = time.perf_counter() - st
+    print(period/50)
 # demo()
+# mean_letency()

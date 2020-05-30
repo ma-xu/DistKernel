@@ -1,31 +1,18 @@
 import torch.nn as nn
-import torch.utils.model_zoo as model_zoo
-from torch.nn.parameter import Parameter
+# import torch.utils.model_zoo as model_zoo
+# from torch.nn.parameter import Parameter
 import torch
-import torch.nn.functional as F
-from torch.nn import init
-from torch.autograd import Variable
-from collections import OrderedDict
-import math
+import time
+# import torch.nn.functional as F
+# from torch.nn import init
+# from torch.autograd import Variable
+# from collections import OrderedDict
+# import math
 
-__all__ = ['se_resnet18', 'se_resnet34', 'se_resnet50', 'se_resnet101', 'se_resnet152']
+#  To evaluate the inference time
+__all__ = ['old_resnet18', 'old_resnet34', 'old_resnet50', 'old_resnet101',
+           'old_resnet152']
 
-class SELayer(nn.Module):
-    def __init__(self, channel, reduction = 16):
-        super(SELayer, self).__init__()
-        self.avg_pool = nn.AdaptiveAvgPool2d(1)
-        self.fc       = nn.Sequential(
-                        nn.Linear(channel, channel // reduction),
-                        nn.ReLU(inplace = True),
-                        nn.Linear(channel // reduction, channel),
-                        nn.Sigmoid()
-                )
-
-    def forward(self, x):
-        b, c, _, _ = x.size()
-        y = self.avg_pool(x).view(b, c)
-        y = self.fc(y).view(b, c, 1, 1)
-        return x * y
 
 def conv3x3(in_planes, out_planes, stride=1):
     """3x3 convolution with padding"""
@@ -37,31 +24,54 @@ def conv1x1(in_planes, out_planes, stride=1):
     """1x1 convolution"""
     return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
 
+class AssConv(nn.Module):
+    def __init__(self, inplanes, planes, stride=1, downsample=None):
+        super(AssConv, self).__init__()
+        self.conv1 = conv3x3(inplanes, planes, stride)
+        self.bn1 = nn.BatchNorm2d(planes)
+        self.fc = nn.Sequential(
+            nn.Linear(inplanes,inplanes//16),
+            nn.ReLU(inplace=True),
+            nn.Linear(inplanes//16,4),
+            nn.Softmax(dim=1)
+        )
+
+
+    def forward(self, x):
+        # just simulate the add on and multiple weights
+        weight = self.conv1.weight
+        alpha =self.fc(x.mean(dim=-1).mean(dim=-1))
+        # weight2 = weight*alpha[0][0]+weight*alpha[0][1]+weight*alpha[0][2]+weight*alpha[0][3]
+        weight2 = weight * alpha[0][0]
+        # self.conv1.weight = nn.Parameter(weight2)
+        return self.bn1(self.conv1(x))
+
+
 
 class BasicBlock(nn.Module):
     expansion = 1
 
     def __init__(self, inplanes, planes, stride=1, downsample=None):
         super(BasicBlock, self).__init__()
-        self.conv1 = conv3x3(inplanes, planes, stride)
-        self.bn1 = nn.BatchNorm2d(planes)
+        # self.conv1 = conv3x3(inplanes, planes, stride)
+        # self.bn1 = nn.BatchNorm2d(planes)
+        self.conv1 = AssConv(inplanes, planes, stride)
         self.relu = nn.ReLU(inplace=True)
-        self.conv2 = conv3x3(planes, planes)
-        self.bn2 = nn.BatchNorm2d(planes)
+        # self.conv2 = conv3x3(planes, planes)
+        # self.bn2 = nn.BatchNorm2d(planes)
+        self.conv2 = AssConv(planes, planes)
         self.downsample = downsample
         self.stride = stride
-        self.se  = SELayer(planes)
 
     def forward(self, x):
         identity = x
 
         out = self.conv1(x)
-        out = self.bn1(out)
+        # out = self.bn1(out)
         out = self.relu(out)
 
         out = self.conv2(out)
-        out = self.bn2(out)
-        out = self.se(out)
+        # out = self.bn2(out)
 
         if self.downsample is not None:
             identity = self.downsample(x)
@@ -79,11 +89,11 @@ class Bottleneck(nn.Module):
         super(Bottleneck, self).__init__()
         self.conv1 = conv1x1(inplanes, planes)
         self.bn1 = nn.BatchNorm2d(planes)
-        self.conv2 = conv3x3(planes, planes, stride)
-        self.bn2 = nn.BatchNorm2d(planes)
+        self.conv2 = AssConv(planes, planes, stride)
+        # self.conv2 = conv3x3(planes, planes, stride)
+        # self.bn2 = nn.BatchNorm2d(planes)
         self.conv3 = conv1x1(planes, planes * self.expansion)
         self.bn3 = nn.BatchNorm2d(planes * self.expansion)
-        self.se  = SELayer(planes * self.expansion)
         self.relu = nn.ReLU(inplace=True)
         self.downsample = downsample
         self.stride = stride
@@ -96,12 +106,11 @@ class Bottleneck(nn.Module):
         out = self.relu(out)
 
         out = self.conv2(out)
-        out = self.bn2(out)
+        # out = self.bn2(out)
         out = self.relu(out)
 
         out = self.conv3(out)
         out = self.bn3(out)
-        out = self.se(out)
 
         if self.downsample is not None:
             identity = self.downsample(x)
@@ -180,7 +189,7 @@ class ResNet(nn.Module):
         return x
 
 
-def se_resnet18(pretrained=False, **kwargs):
+def old_resnet18(pretrained=False, **kwargs):
     """Constructs a ResNet-18 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -189,7 +198,7 @@ def se_resnet18(pretrained=False, **kwargs):
     return model
 
 
-def se_resnet34(pretrained=False, **kwargs):
+def old_resnet34(pretrained=False, **kwargs):
     """Constructs a ResNet-34 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -198,7 +207,7 @@ def se_resnet34(pretrained=False, **kwargs):
     return model
 
 
-def se_resnet50(pretrained=False, **kwargs):
+def old_resnet50(pretrained=False, **kwargs):
     """Constructs a ResNet-50 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -207,7 +216,7 @@ def se_resnet50(pretrained=False, **kwargs):
     return model
 
 
-def se_resnet101(pretrained=False, **kwargs):
+def old_resnet101(pretrained=False, **kwargs):
     """Constructs a ResNet-101 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -216,7 +225,7 @@ def se_resnet101(pretrained=False, **kwargs):
     return model
 
 
-def se_resnet152(pretrained=False, **kwargs):
+def old_resnet152(pretrained=False, **kwargs):
     """Constructs a ResNet-152 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -225,17 +234,28 @@ def se_resnet152(pretrained=False, **kwargs):
     return model
 
 
-
-
 def demo():
-    net = se_resnet50(num_classes=1000)
-    y = net(torch.randn(1, 3, 224,224))
-    print(y.size())
+    st = time.perf_counter()
+    for i in range(1):
+        net = old_resnet18(num_classes=1000)
+        y = net(torch.randn(2, 3, 224,224))
+        print(y.size())
+    print("CPU time: {}".format(time.perf_counter() - st))
 
-# demo()
+def demo2():
+    st = time.perf_counter()
+    for i in range(100):
+        net = old_resnet50(num_classes=1000).cuda()
+        y = net(torch.randn(2, 3, 224,224).cuda())
+        print(y.size())
+    print("CPU time: {}".format(time.perf_counter() - st))
+
+demo()
+# demo2()
+
 def mean_letency():
     import time
-    net = se_resnet50(num_classes=1000)
+    net = old_resnet18(num_classes=1000)
     x = torch.randn(1, 3, 224,224)
     for i in range(10):
         y = net(x)
@@ -245,4 +265,4 @@ def mean_letency():
     period = time.perf_counter() - st
     print(period/50)
 # demo()
-# mean_letency()
+mean_letency()
