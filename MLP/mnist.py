@@ -8,7 +8,7 @@ from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
 from Model1 import Model1
 from PDA import PDA
-
+from PDB import PDB
 
 def train(args, model, device, train_loader, optimizer, epoch):
     model.train()
@@ -93,7 +93,7 @@ def main():
         model = PDA().to(device)
         print("Using PDA")
     elif args.model == 'PDB':
-        model = Model1().to(device)
+        model = PDB().to(device)
         print("Using PDB")
     else:
         model = Model1().to(device)
