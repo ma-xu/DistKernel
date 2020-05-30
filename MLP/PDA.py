@@ -11,11 +11,11 @@ from torch.optim.lr_scheduler import StepLR
 class PDA(nn.Module):
     def __init__(self):
         super(PDA, self).__init__()
-        self.fc1 = nn.Linear(784, 128)
-        self.fc11 = nn.Linear(784, 128)
+        self.fc1 = nn.Linear(784, 64)
+        self.fc11 = nn.Linear(784, 64)
         # self.dropout = nn.Dropout2d(0.5)
-        self.fc2 = nn.Linear(128, 10)
-        self.fc22 = nn.Linear(128, 10)
+        self.fc2 = nn.Linear(64, 10)
+        self.fc22 = nn.Linear(64, 10)
 
     def forward(self, x):
         x = torch.flatten(x, 1)
