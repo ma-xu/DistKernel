@@ -13,9 +13,9 @@ class Ass(nn.Module):
         self.branch1 = nn.Linear(inchannel, outchannel)
         self.branch2 = nn.Linear(inchannel, outchannel)
         self.fc = nn.Sequential(
-            nn.Linear(inchannel, inchannel // 16),
+            nn.Linear(inchannel, 64),
             nn.ReLU(inplace=True),
-            nn.Linear(inchannel // 16, 2),
+            nn.Linear(64, 2),
             nn.Softmax(dim=1)
         )
 
