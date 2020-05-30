@@ -90,7 +90,7 @@ def main():
         batch_size=args.test_batch_size, shuffle=True, **kwargs)
 
     if args.model == 'PDA':
-        model = Model1().to(device)
+        model = PDA().to(device)
         print("Using PDA")
     elif args.model == 'PDB':
         model = Model1().to(device)
