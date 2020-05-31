@@ -11,9 +11,9 @@ from torch.optim.lr_scheduler import StepLR
 class Model1(nn.Module):
     def __init__(self):
         super(Model1, self).__init__()
-        self.fc1 = nn.Linear(784, 64)
+        self.fc1 = nn.Linear(784, 100)
         # self.dropout = nn.Dropout2d(0.5)
-        self.fc2 = nn.Linear(64, 10)
+        self.fc2 = nn.Linear(100, 10)
 
     def forward(self, x):
         x = torch.flatten(x, 1)
