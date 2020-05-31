@@ -67,7 +67,7 @@ parser.add_argument('--lr', '--learning-rate', default=0.1, type=float,
                     metavar='LR', help='initial learning rate')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
                     help='momentum')
-parser.add_argument('--print-freq', '-p', default=500, type=int,
+parser.add_argument('--print-freq', '-p', default=250, type=int,
                     metavar='N', help='print frequency (default: 10)')
 parser.add_argument('-c', '--checkpoint', type=str, metavar='PATH',
                     help='path to save checkpoint (default: checkpoint)')
@@ -589,12 +589,12 @@ def set_optimizer(model):
 
 
 if __name__ == '__main__':
-    # try:
-    #     main()
-    # except Exception as e:
-    #     print(e)
-    #     traceback.print_exc()
-    #     os.system("sudo poweroff")
-    # print("DONE, FINISHED!!!")
-    # os.system("sudo poweroff")
-    main()
+    try:
+        main()
+    except Exception as e:
+        print(e)
+        traceback.print_exc()
+        os.system("sudo poweroff")
+    print("DONE, FINISHED!!!")
+    os.system("sudo poweroff")
+    # main()
