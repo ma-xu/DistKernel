@@ -10,8 +10,8 @@ import time
 # import math
 
 #  To evaluate the inference time
-__all__ = ['old_resnet18', 'old_resnet34', 'old_resnet50', 'old_resnet101',
-           'old_resnet152']
+__all__ = ['PD2_resnet18', 'PD2_resnet34', 'PD2_resnet50', 'PD2_resnet101',
+           'PD2_resnet152']
 
 
 def conv3x3(in_planes, out_planes, stride=1):
@@ -35,6 +35,7 @@ class AssConv(nn.Module):
             nn.Linear(inplanes//16,4),
             nn.Softmax(dim=1)
         )
+        self.register_buffer("weightadd",self.conv1.weight*1+self.conv1.weight*1+self.conv1.weight*1+self.conv1.weight*1)
 
 
     def forward(self, x):
@@ -189,7 +190,7 @@ class ResNet(nn.Module):
         return x
 
 
-def old_resnet18(pretrained=False, **kwargs):
+def PD2_resnet18(pretrained=False, **kwargs):
     """Constructs a ResNet-18 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -198,7 +199,7 @@ def old_resnet18(pretrained=False, **kwargs):
     return model
 
 
-def old_resnet34(pretrained=False, **kwargs):
+def PD2_resnet34(pretrained=False, **kwargs):
     """Constructs a ResNet-34 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -207,7 +208,7 @@ def old_resnet34(pretrained=False, **kwargs):
     return model
 
 
-def old_resnet50(pretrained=False, **kwargs):
+def PD2_resnet50(pretrained=False, **kwargs):
     """Constructs a ResNet-50 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -216,7 +217,7 @@ def old_resnet50(pretrained=False, **kwargs):
     return model
 
 
-def old_resnet101(pretrained=False, **kwargs):
+def PD2_resnet101(pretrained=False, **kwargs):
     """Constructs a ResNet-101 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -225,7 +226,7 @@ def old_resnet101(pretrained=False, **kwargs):
     return model
 
 
-def old_resnet152(pretrained=False, **kwargs):
+def PD2_resnet152(pretrained=False, **kwargs):
     """Constructs a ResNet-152 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -237,7 +238,7 @@ def old_resnet152(pretrained=False, **kwargs):
 def demo():
     st = time.perf_counter()
     for i in range(1):
-        net = old_resnet18(num_classes=1000)
+        net = PD2_resnet18(num_classes=1000)
         y = net(torch.randn(2, 3, 224,224))
         print(y.size())
     print("CPU time: {}".format(time.perf_counter() - st))
@@ -245,17 +246,17 @@ def demo():
 def demo2():
     st = time.perf_counter()
     for i in range(100):
-        net = old_resnet50(num_classes=1000).cuda()
+        net = PD2_resnet50(num_classes=1000).cuda()
         y = net(torch.randn(2, 3, 224,224).cuda())
         print(y.size())
     print("CPU time: {}".format(time.perf_counter() - st))
 
-demo()
+# demo()
 # demo2()
 
 def mean_letency():
     import time
-    net = old_resnet18(num_classes=1000)
+    net = PD2_resnet18(num_classes=1000)
     x = torch.randn(1, 3, 224,224)
     for i in range(10):
         y = net(x)
@@ -265,4 +266,4 @@ def mean_letency():
     period = time.perf_counter() - st
     print(period/50)
 # demo()
-mean_letency()
+# mean_letency()
