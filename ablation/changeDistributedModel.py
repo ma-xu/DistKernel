@@ -8,7 +8,7 @@ import argparse
 
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
 
-parser.add_argument('-p', '--path', default='rnew1_resnet50', type=str)
+parser.add_argument('-p', '--path', default='new1_resnet50', type=str)
 args = parser.parse_args()
 
 
