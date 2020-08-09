@@ -85,8 +85,7 @@ class AssConv(nn.Module):
 
     def forward(self, input):
         if self.seperate:
-            print("no problem")
-            return self.ac_convbn(input)
+            return self.group_bn(self.group_conv(input))
 
 
         else:
