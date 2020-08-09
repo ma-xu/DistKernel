@@ -71,23 +71,28 @@ class ACBlock(nn.Module):
 
 
 class AssConv(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=1, bias=False):
+    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=1, bias=False,seperate=False):
         super(AssConv, self).__init__()
         self.ori_conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=bias)
         self.new_conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=bias)
         self.ac_convbn = ACBlock(in_channels,out_channels,kernel_size,stride,padding)
         self.group_conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, groups=64, bias=bias)
-
+        self.seperate=seperate
         self.ori_bn =  nn.BatchNorm2d(out_channels)
         self.new_bn = nn.BatchNorm2d(out_channels)
         self.group_bn = nn.BatchNorm2d(out_channels)
 
 
     def forward(self, input):
-        # return self.ori_bn(self.ori_conv(input))+self.new_bn(self.new_conv(input))\
-        #        +self.ac_convbn(input)+self.group_bn(self.group_conv(input))
+        if self.seperate:
+            return self.ori_bn(self.ori_conv(input))
 
-        return  self.group_bn(self.group_conv(input))
+        else:
+            return self.ori_bn(self.ori_conv(input))+self.new_bn(self.new_conv(input))\
+                   +self.ac_convbn(input)+self.group_bn(self.group_conv(input))
+
+
+        # return  self.group_bn(self.group_conv(input))
 
 def conv3x3(in_planes, out_planes, stride=1):
     """3x3 convolution with padding"""
@@ -98,6 +103,37 @@ def conv3x3(in_planes, out_planes, stride=1):
 def conv1x1(in_planes, out_planes, stride=1):
     """1x1 convolution"""
     return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
+
+class BasicBlock2(nn.Module):
+    expansion = 1
+
+    def __init__(self, inplanes, planes, stride=1, downsample=None):
+        super(BasicBlock2, self).__init__()
+        self.conv1 = AssConv(inplanes, planes, kernel_size=3, stride=stride, padding=1, bias=False)
+        # self.bn1 = nn.BatchNorm2d(planes)
+        self.relu = nn.ReLU(inplace=True)
+        self.conv2 = AssConv(planes, planes, kernel_size=3, stride=1, padding=1, bias=False,seperate = True)
+        # self.bn2 = nn.BatchNorm2d(planes)
+        self.downsample = downsample
+        self.stride = stride
+
+    def forward(self, x):
+        identity = x
+
+        out = self.conv1(x)
+        # out = self.bn1(out)
+        out = self.relu(out)
+
+        out = self.conv2(out)
+        # out = self.bn2(out)
+
+        if self.downsample is not None:
+            identity = self.downsample(x)
+
+        out += identity
+        out = self.relu(out)
+
+        return out
 
 
 class BasicBlock(nn.Module):
@@ -215,8 +251,11 @@ class ResNet(nn.Module):
         layers = []
         layers.append(block(self.inplanes, planes, stride, downsample))
         self.inplanes = planes * block.expansion
-        for _ in range(1, blocks):
-            layers.append(block(self.inplanes, planes))
+        for ind in range(1, blocks):
+            if planes==512 and ind == blocks-1:
+                layers.append(BasicBlock2(self.inplanes, planes))
+            else:
+                layers.append(block(self.inplanes, planes))
 
         return nn.Sequential(*layers)
 
@@ -299,6 +338,6 @@ def demo2():
         print(y.size())
     # print("CPU time: {}".format(time.perf_counter() - st))
 
-# demo()
+demo()
 # demo2()
 
