@@ -147,10 +147,11 @@ def main():
                 # print(k)
                 # name = k[9:]  # remove `module.1.`
                 # print(name)
-                for layer in args.rm:
-                    if layer in k:
-                        v = v-v # set to zero but keep the same shape
-                        print(f"Setting layer\t {k} \t paprameters to zero.")
+                if args.rm:
+                    for layer in args.rm:
+                        if layer in k:
+                            v = v-v # set to zero but keep the same shape
+                            print(f"Setting layer\t {k} \t paprameters to zero.")
 
                 state_dict[name] = v
             model.load_state_dict(state_dict)
