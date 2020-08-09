@@ -50,7 +50,7 @@ model_names = sorted(name for name in models.__dict__
 
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
 parser.add_argument('-d', '--data', default='/home/g1007540910/DATA/ImageNet2012/', type=str)
-parser.add_argument('--arch', '-a', metavar='ARCH', default='resnet18',
+parser.add_argument('--arch', '-a', metavar='ARCH', default='new1_resnet18',
                     choices=model_names,
                     help='model architecture: ' +
                     ' | '.join(model_names) +
@@ -61,7 +61,9 @@ parser.add_argument('-b', '--batch-size', default=256, type=int,
                     metavar='N', help='mini-batch size (default: 256)')
 parser.add_argument('--print-freq', '-p', default=20, type=int,
                     metavar='N', help='print frequency (default: 10)')
-parser.add_argument('--resume', default='', type=str, metavar='PATH',
+parser.add_argument('--resume',
+                    default='/home/g1007540910/DistKernel/checkpoints/imagenet/new1_resnet18/model_best.pth.tar',
+                    type=str, metavar='PATH',
                     help='path to latest checkpoint (default: none)')
 parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_true',
                     help='evaluate model on validation set')
