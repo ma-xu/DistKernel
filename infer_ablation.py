@@ -126,7 +126,7 @@ def main():
 
     if args.rm:
         for layer in args.rm:
-            print("Remove layer: {}".format(layer))
+            print("Remove branch: {}".format(layer))
     else:
         print("Keep all branches")
 
@@ -145,6 +145,11 @@ def main():
                 # print(k)
                 # name = k[9:]  # remove `module.1.`
                 # print(name)
+                for layer in args.rm:
+                    if layer in k:
+                        v = v-v # set to zero but keep the same shape
+                        print(f"Setting layer\t {k} \t paprameters to zero.")
+
                 state_dict[name] = v
             model.load_state_dict(state_dict)
             print("=> loaded checkpoint '{}' (epoch {})"
