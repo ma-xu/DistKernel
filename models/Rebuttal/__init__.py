@@ -2,3 +2,5 @@ from __future__ import absolute_import
 
 from .resnet_new3_sigmoid import new3_sigmoid_resnet18
 from .resnet_new1_ablation import new1_ablation_resnet18
+from .resnet_identical4 import identica4_resnet18
+from .resnet_identical4B import identica4B_resnet18
