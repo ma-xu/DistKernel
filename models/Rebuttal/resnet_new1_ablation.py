@@ -87,7 +87,7 @@ class AssConv(nn.Module):
         # return self.ori_bn(self.ori_conv(input))+self.new_bn(self.new_conv(input))\
         #        +self.ac_convbn(input)+self.group_bn(self.group_conv(input))
 
-        return  self.new_bn(self.new_conv(input))
+        return  self.ac_convbn(input)
 
 def conv3x3(in_planes, out_planes, stride=1):
     """3x3 convolution with padding"""
