@@ -85,7 +85,7 @@ class AssConv(nn.Module):
 
     def forward(self, input):
         if self.seperate:
-            return self.ori_bn(self.ori_conv(input))
+            return self.new_bn(self.new_conv(input))
 
         else:
             return self.ori_bn(self.ori_conv(input))+self.new_bn(self.new_conv(input))\
