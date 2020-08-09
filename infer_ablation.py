@@ -59,15 +59,14 @@ parser.add_argument('-j', '--workers', default=32, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
 parser.add_argument('-b', '--batch-size', default=256, type=int,
                     metavar='N', help='mini-batch size (default: 256)')
-parser.add_argument('--print-freq', '-p', default=500, type=int,
+parser.add_argument('--print-freq', '-p', default=20, type=int,
                     metavar='N', help='print frequency (default: 10)')
 parser.add_argument('--resume', default='', type=str, metavar='PATH',
                     help='path to latest checkpoint (default: none)')
 parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_true',
                     help='evaluate model on validation set')
 
-parser.add_argument('--rm', type=list, nargs='+',
-                    help='Layers need to be reset as zero')
+parser.add_argument('--rm', nargs='+', help='Layers need to be reset as zero')
 
 parser.add_argument("--local_rank", default=0, type=int)
 
