@@ -97,13 +97,6 @@ class HybridValPipe(Pipeline):
 best_prec1 = 0
 args = parser.parse_args()
 
-# checkpoint
-if args.checkpoint is None:
-    if args.fp16:
-        args.checkpoint='checkpoints/imagenet/'+args.arch+'_FP16'
-    else:
-        args.checkpoint = 'checkpoints/imagenet/' + args.arch + '_FP32'
-
 
 args.distributed = False
 
@@ -148,7 +141,13 @@ def main():
             args.start_epoch = checkpoint['epoch']
             best_prec1 = checkpoint['best_prec1']
             state_dict = OrderedDict()
-            model.load_state_dict(checkpoint['state_dict'])
+            for k, v in checkpoint['state_dict'].items():
+                name = k[7:]  # remove `module.`
+                # print(k)
+                # name = k[9:]  # remove `module.1.`
+                # print(name)
+                state_dict[name] = v
+            model.load_state_dict(state_dict)
             print("=> loaded checkpoint '{}' (epoch {})"
                   .format(args.resume, checkpoint['epoch']))
         else:
