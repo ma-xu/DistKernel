@@ -8,8 +8,8 @@ import torch
 # from torch.autograd import Variable
 # from collections import OrderedDict
 import math
-__all__ = ['identica4_resnet18', 'identica4_resnet34', 'identica4_resnet50', 'identica4_resnet101',
-           'identica4_resnet152']
+__all__ = ['identical4_resnet18', 'identical4_resnet34', 'identical4_resnet50', 'identical4_resnet101',
+           'identical4_resnet152']
 
 class AssConv(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=1, bias=False):
@@ -178,7 +178,7 @@ class ResNet(nn.Module):
         return x
 
 
-def identica4_resnet18(pretrained=False, **kwargs):
+def identical4_resnet18(pretrained=False, **kwargs):
     """Constructs a ResNet-18 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -187,7 +187,7 @@ def identica4_resnet18(pretrained=False, **kwargs):
     return model
 
 
-def identica4_resnet34(pretrained=False, **kwargs):
+def identical4_resnet34(pretrained=False, **kwargs):
     """Constructs a ResNet-34 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -196,7 +196,7 @@ def identica4_resnet34(pretrained=False, **kwargs):
     return model
 
 
-def identica4_resnet50(pretrained=False, **kwargs):
+def identical4_resnet50(pretrained=False, **kwargs):
     """Constructs a ResNet-50 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -205,7 +205,7 @@ def identica4_resnet50(pretrained=False, **kwargs):
     return model
 
 
-def identica4_resnet101(pretrained=False, **kwargs):
+def identical4_resnet101(pretrained=False, **kwargs):
     """Constructs a ResNet-101 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -214,7 +214,7 @@ def identica4_resnet101(pretrained=False, **kwargs):
     return model
 
 
-def identica4_resnet152(pretrained=False, **kwargs):
+def identical4_resnet152(pretrained=False, **kwargs):
     """Constructs a ResNet-152 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -226,7 +226,7 @@ def identica4_resnet152(pretrained=False, **kwargs):
 def demo():
     # st = time.perf_counter()
     for i in range(1):
-        net = identica4_resnet18(num_classes=1000)
+        net = identical4_resnet18(num_classes=1000)
         y = net(torch.randn(2, 3, 224,224))
         print(y.size())
     # print("CPU time: {}".format(time.perf_counter() - st))
@@ -234,7 +234,7 @@ def demo():
 def demo2():
     # st = time.perf_counter()
     for i in range(1):
-        net = identica4_resnet50(num_classes=1000).cuda()
+        net = identical4_resnet50(num_classes=1000).cuda()
         y = net(torch.randn(2, 3, 224,224).cuda())
         print(y.size())
     # print("CPU time: {}".format(time.perf_counter() - st))
