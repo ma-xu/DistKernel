@@ -7,18 +7,19 @@ import torch
 # from torch.nn import init
 # from torch.autograd import Variable
 # from collections import OrderedDict
-from models.ResNet import old_resnet18
-from models.ResNet import ac_resnet18
-from models.ResNet import ge_resnet18
-from models.ResNet import se_resnet18
+from resnet_old import old_resnet18
+from resnet_se import se_resnet18
+from resnet_ac import ac_resnet18
+from resnet_ge import ge_resnet18
 
 __all__ = ['mix4_ensemblenet','ori4_ensemblenet','se4_ensemblenet','ge4_ensemblenet','ac4_ensemblenet']
 
+# https://github.com/NVIDIA/apex/issues/714
 class EnsembleNet(nn.Module):
     def __init__(self, subnets):
         super(EnsembleNet, self).__init__()
         assert len(subnets) > 0
-        self.subnets = []
+        self.subnets = nn.ModuleList()
         for subnet in subnets:
             self.subnets.append(subnet)
         self.fc = nn.Conv1d(len(self.subnets),1,1,bias=False)
@@ -27,9 +28,9 @@ class EnsembleNet(nn.Module):
         for subnet in self.subnets:
             sub_out = subnet(x).unsqueeze(dim=1)
             out = torch.cat([out,sub_out],dim=1) if out is not None else sub_out
-        print(out.shape)
+        # print(out.shape)
         out = self.fc(out).squeeze(dim=1)
-        print(out.shape)
+        # print(out.shape)
         return out
 
 def mix4_ensemblenet(**kwargs):
