@@ -7,10 +7,10 @@ import torch
 # from torch.nn import init
 # from torch.autograd import Variable
 # from collections import OrderedDict
-from resnet_old import old_resnet18
-from resnet_se import se_resnet18
-from resnet_ac import ac_resnet18
-from resnet_ge import ge_resnet18
+from .resnet_old import old_resnet18
+from .resnet_se import se_resnet18
+from .resnet_ac import ac_resnet18
+from .resnet_ge import ge_resnet18
 
 __all__ = ['mix4_ensemblenet','ori4_ensemblenet','se4_ensemblenet','ge4_ensemblenet','ac4_ensemblenet']
 
