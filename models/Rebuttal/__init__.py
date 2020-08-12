@@ -5,3 +5,4 @@ from .resnet_new1_ablation import new1_ablation_resnet18
 from .resnet_identical4 import identical4_resnet18
 from .resnet_identical4b import identical4b_resnet18
 from .resnet_new1_six import new1_six_resnet18
+from .resnet_new3_six import new3_six_resnet18
