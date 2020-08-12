@@ -19,6 +19,7 @@ import os
 import shutil
 import time
 import traceback
+import warnings
 
 import torch
 from torch.autograd import Variable
@@ -32,6 +33,8 @@ import torch.utils.data.distributed
 import models as models
 from utils import Logger, mkdir_p
 
+# Ignoring warnings
+warnings.filterwarnings('ignore')
 
 try:
     from nvidia.dali.plugin.pytorch import DALIClassificationIterator
@@ -512,4 +515,5 @@ if __name__ == '__main__':
     #     os.system("sudo poweroff")
     # print("DONE, FINISHED!!!")
     # os.system("sudo poweroff")
+
     main()
