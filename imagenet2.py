@@ -20,6 +20,7 @@ import shutil
 import time
 import traceback
 import warnings
+from collections import OrderedDict
 
 import torch
 from torch.autograd import Variable
@@ -246,7 +247,14 @@ def main():
             checkpoint = torch.load(args.resume, map_location=lambda storage, loc: storage.cuda(args.gpu))
             args.start_epoch = checkpoint['epoch']
             best_prec1 = checkpoint['best_prec1']
-            model.load_state_dict(checkpoint['state_dict'])
+            state_dict = OrderedDict()
+            for k, v in checkpoint['state_dict'].items():
+                # name = k[7:]  # remove `module.`
+                # print(k)
+                name = k[9:]  # remove `module.1.`
+                # print(name)
+                state_dict[name] = v
+            model.load_state_dict(state_dict)
             optimizer.load_state_dict(checkpoint['optimizer'])
             print("=> loaded checkpoint '{}' (epoch {})"
                   .format(args.resume, checkpoint['epoch']))
@@ -507,12 +515,13 @@ def reduce_tensor(tensor):
     return rt
 
 if __name__ == '__main__':
-    try:
-        main()
-    except Exception as e:
-        print(e)
-        traceback.print_exc()
-        os.system("sudo poweroff")
-    print("DONE, FINISHED!!!")
-    os.system("sudo poweroff")
-    # main()
+    # try:
+    #     main()
+    # except Exception as e:
+    #     print(e)
+    #     traceback.print_exc()
+    #     os.system("sudo poweroff")
+    # print("DONE, FINISHED!!!")
+    # os.system("sudo poweroff")
+
+    main()
