@@ -1,7 +1,7 @@
 """
 nohup python main.py -a old_resnet18 --evaluate --resume old_resnet18_model_best.pth.tar > old_resnet18.log &
 nohup python main.py -a new1_resnet18 --evaluate --resume new1_resnet18_model_best.pth.tar > new1_resnet18.log &
-nohup python main.py -a new3_resnet18 --evaluate --resume new3_resnet18_model_best.pth.tar > new3_resnet18.log &
+nohup python main.py -a new3_resnet18 --evaluate --resume new3_resnet18_model_best.pth.tar -b 64 > new3_resnet18.log &
 """
 import argparse
 import os
@@ -28,6 +28,8 @@ import sys
 sys.path.append('../')
 import models as models
 from load_pretrained import load_pretrained, rand_normalize_directions, get_combined_weights
+import warnings
+warnings.filterwarnings("ignore")
 
 
 model_names = sorted(name for name in models.__dict__
@@ -42,7 +44,7 @@ parser.add_argument('-a', '--arch', metavar='ARCH', default='resnet18',
                     help='model architecture: ' +
                         ' | '.join(model_names) +
                         ' (default: resnet18)')
-parser.add_argument('-j', '--workers', default=16, type=int, metavar='N',
+parser.add_argument('-j', '--workers', default=32, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
 parser.add_argument('--epochs', default=90, type=int, metavar='N',
                     help='number of total epochs to run')
@@ -207,8 +209,10 @@ def main_worker(gpu, ngpus_per_node, args):
 
     cudnn.benchmark = True
 
-    list_1 = np.arange(-0.5, 0.6, 0.1)
-    list_2 = np.arange(-0.5, 0.6, 0.1)
+    # list_1 = np.arange(-0.5, 0.6, 0.1)
+    # list_2 = np.arange(-0.5, 0.6, 0.1)
+    list_1 = np.arange(-1, 1, 0.05)
+    list_2 = np.arange(-1, 1, 0.05)
 
     print("initlizing logger")
     logger = logging.getLogger(args.arch)
