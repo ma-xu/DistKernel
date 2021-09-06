@@ -178,7 +178,7 @@ def main_worker(gpu, ngpus_per_node, args):
             checkpoint = load_pretrained(args)
             direction1 = rand_normalize_directions(checkpoint)
             direction2 = rand_normalize_directions(checkpoint)
-            combined_weights = get_combined_weights(direction1, direction2, checkpoint, 1,1)
+            combined_weights = get_combined_weights(direction1, direction2, checkpoint, 0,0)
             model.load_state_dict(combined_weights)
             print("=> loaded combined checkpoint.")
 
