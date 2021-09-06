@@ -176,8 +176,11 @@ def main_worker(gpu, ngpus_per_node, args):
     if args.resume:
         if os.path.isfile(args.resume):
             checkpoint = load_pretrained(args)
-            model.load_state_dict(checkpoint)
-            print("=> loaded checkpoint '{}'".format(args.resume))
+            direction1 = rand_normalize_directions(checkpoint)
+            direction2 = rand_normalize_directions(checkpoint)
+            combined_weights = get_combined_weights(direction1, direction2, checkpoint, 1,1)
+            model.load_state_dict(combined_weights)
+            print("=> loaded combined checkpoint.")
 
 
             # if args.gpu is None:
@@ -250,11 +253,12 @@ def validate(val_loader, model, criterion, args):
 
             if i % args.print_freq == 0:
                 progress.display(i)
-                print(f"loss is {losses.avg}")
+
 
         # TODO: this should also be done with the ProgressMeter
         print(' * Acc@1 {top1.avg:.3f} Acc@5 {top5.avg:.3f}'
               .format(top1=top1, top5=top5))
+        print(f"loss is {losses.avg}")
 
 
     return top1.avg
