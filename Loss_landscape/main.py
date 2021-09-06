@@ -1,3 +1,6 @@
+"""
+python main.py -a old_resnet18 --evaluate --resume old_resnet18_model_best.pth.tar
+"""
 import argparse
 import os
 import random
@@ -55,7 +58,7 @@ parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
 parser.add_argument('--wd', '--weight-decay', default=1e-4, type=float,
                     metavar='W', help='weight decay (default: 1e-4)',
                     dest='weight_decay')
-parser.add_argument('-p', '--print-freq', default=10, type=int,
+parser.add_argument('-p', '--print-freq', default=500, type=int,
                     metavar='N', help='print frequency (default: 10)')
 parser.add_argument('--resume', default='', type=str, metavar='PATH',
                     help='path to latest checkpoint (default: none)')
@@ -216,7 +219,7 @@ def main_worker(gpu, ngpus_per_node, args):
 
     for w1 in list_1:
         for w2 in list_2:
-            print("\n\n===> * {w1:.1f}  {w2:.1f}".format(w1=w1, w2=w2))
+            print("\n\n===> w1{w1:.1f} w2{w2:.1f}".format(w1=w1, w2=w2))
             combined_weights = get_combined_weights(direction1, direction2, checkpoint, w1,w2)
             model.load_state_dict(combined_weights)
             loss, accuracy = validate(val_loader, model, criterion, args)
@@ -260,8 +263,6 @@ def validate(val_loader, model, criterion, args):
 
             if i % args.print_freq == 0:
                 progress.display(i)
-            if i>2:
-                break
 
         # TODO: this should also be done with the ProgressMeter
         print(' * Acc@1 {top1.avg:.3f} Acc@5 {top5.avg:.3f}'
