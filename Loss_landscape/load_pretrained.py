@@ -34,7 +34,7 @@ def get_parser():
                         metavar='N', help='print frequency (default: 10)')
     parser.add_argument('-c', '--checkpoint', type=str, metavar='PATH',
                         help='path to save checkpoint (default: checkpoint)')
-    parser.add_argument('--resume', default='/Users/xuma/Downloads/model_best.pth.tar', type=str, metavar='PATH',
+    parser.add_argument('--resume', default='/Users/xuma/Downloads/old_resnet18_model_best.pth.tar', type=str, metavar='PATH',
                         help='path to latest checkpoint (default: none)')
     parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_true',
                         help='evaluate model on validation set')
@@ -62,10 +62,12 @@ def load_pretrained(args):
     checkpoint = torch.load(args.resume, map_location=torch.device('cpu'))
     new_dict = OrderedDict()
     for k, v in checkpoint['state_dict'].items():
+        # if k.startswith("module.1."):
+        #     k = k[9:]
+        # if k.startswith("module."):
+        #     k = k[7:]
         if k.startswith("module.1."):
-            k = k[9:]
-        if k.startswith("module."):
-            k = k[7:]
+            k[0:9] = k[0:7]
         new_dict[k] = v
     return new_dict
 
