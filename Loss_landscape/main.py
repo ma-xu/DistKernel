@@ -1,5 +1,7 @@
 """
-python main.py -a old_resnet18 --evaluate --resume old_resnet18_model_best.pth.tar
+nohup python main.py -a old_resnet18 --evaluate --resume old_resnet18_model_best.pth.tar > old_resnet18.log &
+nohup python main.py -a new1_resnet18 --evaluate --resume new1_resnet18_model_best.pth.tar > new1_resnet18.log &
+nohup python main.py -a new3_resnet18 --evaluate --resume new3_resnet18_model_best.pth.tar > new3_resnet18.log &
 """
 import argparse
 import os
@@ -205,8 +207,8 @@ def main_worker(gpu, ngpus_per_node, args):
 
     cudnn.benchmark = True
 
-    list_1 = np.arange(-1, 1.1, 0.1)
-    list_2 = np.arange(-1, 1.1, 0.1)
+    list_1 = np.arange(-0.5, 0.6, 0.1)
+    list_2 = np.arange(-0.5, 0.6, 0.1)
 
     print("initlizing logger")
     logger = logging.getLogger(args.arch)
