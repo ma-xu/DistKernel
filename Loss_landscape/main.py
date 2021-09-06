@@ -4,7 +4,9 @@ import random
 import shutil
 import time
 import warnings
+import logging
 
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.parallel
@@ -172,32 +174,7 @@ def main_worker(gpu, ngpus_per_node, args):
     # define loss function (criterion) and optimizer
     criterion = nn.CrossEntropyLoss().cuda(args.gpu)
 
-    # optionally resume from a checkpoint
-    if args.resume:
-        if os.path.isfile(args.resume):
-            checkpoint = load_pretrained(args)
-            direction1 = rand_normalize_directions(checkpoint)
-            direction2 = rand_normalize_directions(checkpoint)
-            combined_weights = get_combined_weights(direction1, direction2, checkpoint, 0,0)
-            model.load_state_dict(combined_weights)
-            print("=> loaded combined checkpoint.")
-
-
-            # if args.gpu is None:
-            #     checkpoint = torch.load(args.resume)
-            # else:
-            #     # Map model to be loaded to specified single gpu.
-            #     loc = 'cuda:{}'.format(args.gpu)
-            #     checkpoint = torch.load(args.resume, map_location=loc)
-            # model.load_state_dict(checkpoint['state_dict'])
-            # print("=> loaded checkpoint '{}' (epoch {})"
-            #       .format(args.resume, checkpoint['epoch']))
-        else:
-            print("=> no checkpoint found at '{}'".format(args.resume))
-
-    cudnn.benchmark = True
-
-    # Data loading code
+     # Data loading code
     valdir = os.path.join(args.data, 'val')
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
@@ -212,8 +189,37 @@ def main_worker(gpu, ngpus_per_node, args):
         batch_size=args.batch_size, shuffle=False,
         num_workers=args.workers, pin_memory=True)
 
+    # optionally resume from a checkpoint
+    if os.path.isfile(args.resume):
+        checkpoint = load_pretrained(args)
+        direction1 = rand_normalize_directions(checkpoint)
+        direction2 = rand_normalize_directions(checkpoint)
 
-    validate(val_loader, model, criterion, args)
+
+        print("=> loaded combined checkpoint.")
+    else:
+        print("=> no checkpoint found at '{}'".format(args.resume))
+
+    cudnn.benchmark = True
+
+    list_1 = np.arange(-1, 1.1, 0.1)
+    list_2 = np.arange(-1, 1.1, 0.1)
+
+    print("initlizing logger")
+    logger = logging.getLogger(args.arch)
+    logger.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(message)s')
+    file_handler = logging.FileHandler(args.arch+"out.txt")
+    file_handler.setLevel(logging.INFO)
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+
+    for w1 in list_1:
+        for w2 in list_2:
+            combined_weights = get_combined_weights(direction1, direction2, checkpoint, w1,w2)
+            model.load_state_dict(combined_weights)
+            loss, accuracy = validate(val_loader, model, criterion, args)
+            logger.info(f"{w1}\t{w2}\t{loss}\t{accuracy}")
 
 
 def validate(val_loader, model, criterion, args):
@@ -253,7 +259,8 @@ def validate(val_loader, model, criterion, args):
 
             if i % args.print_freq == 0:
                 progress.display(i)
-
+            if i>2:
+                break
 
         # TODO: this should also be done with the ProgressMeter
         print(' * Acc@1 {top1.avg:.3f} Acc@5 {top5.avg:.3f}'
@@ -261,7 +268,7 @@ def validate(val_loader, model, criterion, args):
         print(f"loss is {losses.avg}")
 
 
-    return top1.avg
+    return losses.avg, top1.avg
 
 
 class AverageMeter(object):
