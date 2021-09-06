@@ -16,10 +16,12 @@ import torch.utils.data
 import torch.utils.data.distributed
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
-import torchvision.models as models
-# import sys
-# sys.path.append('../')
-# import models as models
+# import torchvision.models as models
+import sys
+sys.path.append('../')
+import models as models
+from load_pretrained import load_pretrained, rand_normalize_directions, get_combined_weights
+
 
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
@@ -77,8 +79,6 @@ parser.add_argument('--multiprocessing-distributed', action='store_true',
                          'fastest way to use PyTorch for either single node or '
                          'multi node data parallel training')
 
-best_acc1 = 0
-
 
 def main():
     args = parser.parse_args()
@@ -116,7 +116,6 @@ def main():
 
 
 def main_worker(gpu, ngpus_per_node, args):
-    global best_acc1
     args.gpu = gpu
 
     if args.gpu is not None:
@@ -173,27 +172,23 @@ def main_worker(gpu, ngpus_per_node, args):
     # define loss function (criterion) and optimizer
     criterion = nn.CrossEntropyLoss().cuda(args.gpu)
 
-    optimizer = torch.optim.SGD(model.parameters(), args.lr,
-                                momentum=args.momentum,
-                                weight_decay=args.weight_decay)
-
     # optionally resume from a checkpoint
     if args.resume:
         if os.path.isfile(args.resume):
-            print("=> loading checkpoint '{}'".format(args.resume))
-            if args.gpu is None:
-                checkpoint = torch.load(args.resume)
-            else:
-                # Map model to be loaded to specified single gpu.
-                loc = 'cuda:{}'.format(args.gpu)
-                checkpoint = torch.load(args.resume, map_location=loc)
-            if args.gpu is not None:
-                # best_acc1 may be from a checkpoint from a different GPU
-                best_acc1 = best_acc1.to(args.gpu)
-            model.load_state_dict(checkpoint['state_dict'])
-            optimizer.load_state_dict(checkpoint['optimizer'])
-            print("=> loaded checkpoint '{}' (epoch {})"
-                  .format(args.resume, checkpoint['epoch']))
+            checkpoint = load_pretrained(args)
+            model.load_state_dict(checkpoint)
+            print("=> loaded checkpoint '{}'".format(args.resume))
+
+
+            # if args.gpu is None:
+            #     checkpoint = torch.load(args.resume)
+            # else:
+            #     # Map model to be loaded to specified single gpu.
+            #     loc = 'cuda:{}'.format(args.gpu)
+            #     checkpoint = torch.load(args.resume, map_location=loc)
+            # model.load_state_dict(checkpoint['state_dict'])
+            # print("=> loaded checkpoint '{}' (epoch {})"
+            #       .format(args.resume, checkpoint['epoch']))
         else:
             print("=> no checkpoint found at '{}'".format(args.resume))
 
@@ -303,12 +298,6 @@ class ProgressMeter(object):
         fmt = '{:' + str(num_digits) + 'd}'
         return '[' + fmt + '/' + fmt.format(num_batches) + ']'
 
-
-def adjust_learning_rate(optimizer, epoch, args):
-    """Sets the learning rate to the initial LR decayed by 10 every 30 epochs"""
-    lr = args.lr * (0.1 ** (epoch // 30))
-    for param_group in optimizer.param_groups:
-        param_group['lr'] = lr
 
 
 def accuracy(output, target, topk=(1,)):

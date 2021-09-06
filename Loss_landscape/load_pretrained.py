@@ -81,9 +81,16 @@ def rand_normalize_directions( states, ignore='ignore'):
                 d = w
         else:
             d = torch.rand_like(w)
-            d = d-d.mean() + w.mean()
+            # d = d-d.mean() + w.mean()
             d.mul_(w.norm()/(d.norm() + 1e-10))
         new_dict[k] = d
+    return new_dict
+
+
+def get_combined_weights(direction1, direction2, pretrained, weight1, weight2, weight_pretrained=1.0):
+    new_dict = OrderedDict()
+    for (k, d1),(_,d2), (_,w) in zip(direction1.items(), direction2.items(), pretrained.items()):
+        new_dict[k] = weight1 * d1 + weight2 * d2 + weight_pretrained * w
     return new_dict
 
 
@@ -92,4 +99,8 @@ if __name__ == '__main__':
     pretrained_weights = load_pretrained(args)
     direction1 = rand_normalize_directions(pretrained_weights)
     direction2 = rand_normalize_directions(pretrained_weights)
-
+    import numpy as np
+    list_1 = np.arange(-1, 1.1, 0.1)
+    print(list_1)
+    combined = get_combined_weights(direction1, direction2, pretrained_weights, 1,1)
+    print(combined)
