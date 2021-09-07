@@ -78,13 +78,13 @@ def rand_normalize_directions(args, states, ignore='ignore'):
     init_dict = model.state_dict()
     new_dict = OrderedDict()
     for (k, w), (k2, d) in zip(states.items(), init_dict.items()):
-        if w.dim() <= 1:
-            if ignore == 'biasbn':
-                d = torch.zeros_like(w)  # ignore directions for weights with 1 dimension
-            else:
-                d = w
-        else:
-            d.mul_(w.norm()/(d.norm() + 1e-10))
+        # if w.dim() <= 1:
+        #     if ignore == 'biasbn':
+        #         d = torch.zeros_like(w)  # ignore directions for weights with 1 dimension
+        #     else:
+        #         d = w
+        # else:
+        #     d.mul_(w.norm()/(d.norm() + 1e-10))
         new_dict[k] = d
     return new_dict
 
