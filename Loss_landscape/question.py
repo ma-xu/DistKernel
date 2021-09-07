@@ -211,8 +211,8 @@ def main_worker(gpu, ngpus_per_node, args):
 
     # list_1 = np.arange(-0.5, 0.6, 0.1)
     # list_2 = np.arange(-0.5, 0.6, 0.1)
-    list_1 = np.arange(-0.5, 0.55, 0.05)
-    list_2 = np.arange(-0.5, 0.55, 0.05)
+    list_1 = np.arange(-0.3, 0.55, 0.05)
+    list_2 = np.arange(-0.3, 0.55, 0.05)
 
     print("initlizing logger")
     logger = logging.getLogger(args.arch)
