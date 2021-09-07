@@ -50,7 +50,7 @@ parser.add_argument('--epochs', default=90, type=int, metavar='N',
                     help='number of total epochs to run')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                     help='manual epoch number (useful on restarts)')
-parser.add_argument('-b', '--batch-size', default=256, type=int,
+parser.add_argument('-b', '--batch-size', default=128, type=int,
                     metavar='N',
                     help='mini-batch size (default: 256), this is the total '
                          'batch size of all GPUs on the current node when '
@@ -199,15 +199,38 @@ def main_worker(gpu, ngpus_per_node, args):
     # optionally resume from a checkpoint
     if os.path.isfile(args.resume):
         checkpoint = load_pretrained(args)
-        model.load_state_dict(checkpoint)
-        print("=> loaded checkpoint.")
+        direction1 = rand_normalize_directions(args, checkpoint)
+        direction2 = rand_normalize_directions(args, checkpoint)
+
+
+        print("=> loaded combined checkpoint.")
     else:
         print("=> no checkpoint found at '{}'".format(args.resume))
 
     cudnn.benchmark = True
 
-    loss, accuracy = validate(val_loader, model, criterion, args)
-    print("{loss},{accuracy}".format(loss=loss, accuracy=accuracy))
+    # list_1 = np.arange(-0.5, 0.6, 0.1)
+    # list_2 = np.arange(-0.5, 0.6, 0.1)
+    list_1 = np.arange(-1, 1, 0.05)
+    list_2 = np.arange(-1, 1, 0.05)
+
+    print("initlizing logger")
+    logger = logging.getLogger(args.arch)
+    logger.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(message)s')
+    file_handler = logging.FileHandler(args.arch+"test.txt")
+    file_handler.setLevel(logging.INFO)
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+
+    for w1 in list_1:
+        for w2 in list_2:
+            w1,w2 = 0,0
+            print("\n\n===> w1{w1:.1f} w2{w2:.1f}".format(w1=w1, w2=w2))
+            combined_weights = get_combined_weights(direction1, direction2, checkpoint, w1,w2)
+            model.load_state_dict(combined_weights)
+            loss, accuracy = validate(val_loader, model, criterion, args)
+            logger.info("{w1:.1f},{w2:.1f},{loss},{accuracy}".format(w1=w1, w2=w2,loss=loss, accuracy=accuracy))
 
 
 def validate(val_loader, model, criterion, args):

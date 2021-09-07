@@ -72,18 +72,18 @@ def load_pretrained(args):
     return new_dict
 
 
-def rand_normalize_directions( states, ignore='ignore'):
+def rand_normalize_directions(args, states, ignore='ignore'):
     # assert(len(direction) == len(states))
+    model = models.__dict__[args.arch]()
+    init_dict = model.state_dict()
     new_dict = OrderedDict()
-    for k, w in states.items():
+    for (k, w), (k2, d) in zip(states.items(), init_dict.items()):
         if w.dim() <= 1:
             if ignore == 'biasbn':
                 d = torch.zeros_like(w)  # ignore directions for weights with 1 dimension
             else:
                 d = w
         else:
-            d = torch.rand_like(w)
-            d = d-d.mean() + w.mean()
             d.mul_(w.norm()/(d.norm() + 1e-10))
         new_dict[k] = d
     return new_dict
@@ -99,10 +99,10 @@ def get_combined_weights(direction1, direction2, pretrained, weight1, weight2, w
 if __name__ == '__main__':
     args = get_parser()
     pretrained_weights = load_pretrained(args)
-    direction1 = rand_normalize_directions(pretrained_weights)
-    direction2 = rand_normalize_directions(pretrained_weights)
-    import numpy as np
-    list_1 = np.arange(-1, 1.1, 0.1)
-    print(list_1)
-    combined = get_combined_weights(direction1, direction2, pretrained_weights, 1,1)
-    print(combined)
+    direction1 = rand_normalize_directions(args, pretrained_weights)
+    direction2 = rand_normalize_directions(args, pretrained_weights)
+    # import numpy as np
+    # list_1 = np.arange(-1, 1.1, 0.1)
+    # print(list_1)
+    # combined = get_combined_weights(direction1, direction2, pretrained_weights, 1,1)
+    # print(combined)
