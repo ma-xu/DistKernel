@@ -1,5 +1,5 @@
 """
-nohup python main.py > three_models.log &
+nohup python evaluate.py > three_models.log &
 """
 import argparse
 import os
@@ -42,7 +42,7 @@ parser.add_argument('-a', '--arch', metavar='ARCH', default='resnet18',
                     help='model architecture: ' +
                         ' | '.join(model_names) +
                         ' (default: resnet18)')
-parser.add_argument('-j', '--workers', default=32, type=int, metavar='N',
+parser.add_argument('-j', '--workers', default=64, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
 parser.add_argument('--epochs', default=90, type=int, metavar='N',
                     help='number of total epochs to run')
@@ -244,7 +244,7 @@ def main_worker(gpu, ngpus_per_node, args):
 
     for w1 in list_1:
         for w2 in list_2:
-            print("\n\n===> w1{w1:.1f} w2{w2:.1f}".format(w1=w1, w2=w2))
+            print("\n\n===> w1{w1:.2f} w2{w2:.2f}".format(w1=w1, w2=w2))
             combined_weights_old = get_combined_weights(direction1_old, direction2_old, checkpoint_old, w1,w2)
             model_old.load_state_dict(combined_weights_old)
             combined_weights_new1 = get_combined_weights(direction1_new1, direction2_new1, checkpoint_new1, w1,w2)
