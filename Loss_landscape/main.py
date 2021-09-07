@@ -1,7 +1,7 @@
 """
-nohup python main.py -a old_resnet18 --evaluate --resume old_resnet18_model_best.pth.tar > old_resnet18.log &
-nohup python main.py -a new1_resnet18 --evaluate --resume new1_resnet18_model_best.pth.tar > new1_resnet18.log &
-nohup python main.py -a new3_resnet18 --evaluate --resume new3_resnet18_model_best.pth.tar -b 64 > new3_resnet18.log &
+nohup python main.py -a old_resnet18 --evaluate --resume old_resnet18_model_best.pth.tar > loss_old_resnet18.log &
+nohup python main.py -a new1_resnet18 --evaluate --resume new1_resnet18_model_best.pth.tar > loss_new1_resnet18.log &
+nohup python main.py -a new3_resnet18 --evaluate --resume new3_resnet18_model_best.pth.tar -b 64 > loss_new3_resnet18.log &
 """
 import argparse
 import os
@@ -50,7 +50,7 @@ parser.add_argument('--epochs', default=90, type=int, metavar='N',
                     help='number of total epochs to run')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                     help='manual epoch number (useful on restarts)')
-parser.add_argument('-b', '--batch-size', default=256, type=int,
+parser.add_argument('-b', '--batch-size', default=128, type=int,
                     metavar='N',
                     help='mini-batch size (default: 256), this is the total '
                          'batch size of all GPUs on the current node when '
@@ -199,8 +199,8 @@ def main_worker(gpu, ngpus_per_node, args):
     # optionally resume from a checkpoint
     if os.path.isfile(args.resume):
         checkpoint = load_pretrained(args)
-        direction1 = rand_normalize_directions(checkpoint)
-        direction2 = rand_normalize_directions(checkpoint)
+        direction1 = rand_normalize_directions(args, checkpoint)
+        direction2 = rand_normalize_directions(args, checkpoint)
 
 
         print("=> loaded combined checkpoint.")
@@ -211,25 +211,25 @@ def main_worker(gpu, ngpus_per_node, args):
 
     # list_1 = np.arange(-0.5, 0.6, 0.1)
     # list_2 = np.arange(-0.5, 0.6, 0.1)
-    list_1 = np.arange(-1, 1, 0.05)
-    list_2 = np.arange(-1, 1, 0.05)
+    list_1 = np.arange(-1, 1.1, 0.1)
+    list_2 = np.arange(-1, 1.1, 0.1)
 
     print("initlizing logger")
     logger = logging.getLogger(args.arch)
     logger.setLevel(logging.INFO)
     formatter = logging.Formatter('%(message)s')
-    file_handler = logging.FileHandler(args.arch+"out.txt")
+    file_handler = logging.FileHandler(args.arch+"new_losses.txt")
     file_handler.setLevel(logging.INFO)
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
 
     for w1 in list_1:
         for w2 in list_2:
-            print("\n\n===> w1{w1:.1f} w2{w2:.1f}".format(w1=w1, w2=w2))
+            print("\n\n===> w1 {w1:.2f} w2 {w2:.2f}".format(w1=w1, w2=w2))
             combined_weights = get_combined_weights(direction1, direction2, checkpoint, w1,w2)
             model.load_state_dict(combined_weights)
             loss, accuracy = validate(val_loader, model, criterion, args)
-            logger.info("{w1:.1f},{w2:.1f},{loss},{accuracy}".format(w1=w1, w2=w2,loss=loss, accuracy=accuracy))
+            logger.info("{w1:.2f},{w2:.2f},{loss},{accuracy}".format(w1=w1, w2=w2,loss=loss, accuracy=accuracy))
 
 
 def validate(val_loader, model, criterion, args):

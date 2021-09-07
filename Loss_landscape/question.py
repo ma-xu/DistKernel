@@ -1,7 +1,7 @@
 """
-nohup python main.py -a old_resnet18 --evaluate --resume old_resnet18_model_best.pth.tar > old_resnet18.log &
-nohup python main.py -a new1_resnet18 --evaluate --resume new1_resnet18_model_best.pth.tar > new1_resnet18.log &
-nohup python main.py -a new3_resnet18 --evaluate --resume new3_resnet18_model_best.pth.tar -b 64 > new3_resnet18.log &
+nohup python question.py -a old_resnet18 --evaluate --resume old_resnet18_model_best.pth.tar > loss_old_resnet18.log &
+nohup python question.py -a new1_resnet18 --evaluate --resume new1_resnet18_model_best.pth.tar > loss_new1_resnet18.log &
+nohup python question.py -a new3_resnet18 --evaluate --resume new3_resnet18_model_best.pth.tar -b 64 > loss_new3_resnet18.log &
 """
 import argparse
 import os
