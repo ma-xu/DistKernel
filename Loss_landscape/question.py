@@ -225,8 +225,8 @@ def main_worker(gpu, ngpus_per_node, args):
 
     for w1 in list_1:
         for w2 in list_2:
-            w1,w2 = 0.05,0.05
-            print("\n\n===> w1 {w1:.1f} w2 {w2:.1f}".format(w1=w1, w2=w2))
+            w1,w2 = 0.03,0.03
+            print("\n\n===> w1 {w1:.2f} w2 {w2:.2f}".format(w1=w1, w2=w2))
             combined_weights = get_combined_weights(direction1, direction2, checkpoint, w1,w2)
             model.load_state_dict(combined_weights)
             loss, accuracy = validate(val_loader, model, criterion, args)
