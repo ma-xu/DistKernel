@@ -72,7 +72,7 @@ def load_pretrained(args):
     return new_dict
 
 
-def rand_normalize_directions(args, states, ignore='ignore'):
+def rand_normalize_directions(args, states, ignore='biasbn'):
     # assert(len(direction) == len(states))
     model = models.__dict__[args.arch]()
     init_dict = model.state_dict()
