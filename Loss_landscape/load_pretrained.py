@@ -84,7 +84,7 @@ def rand_normalize_directions(args, states, ignore='ignore'):
         #     else:
         #         d = w
         # else:
-        #     d.mul_(w.norm()/(d.norm() + 1e-10))
+        d.mul_(w.norm()/(d.norm() + 1e-10))
         new_dict[k] = d
     return new_dict
 
