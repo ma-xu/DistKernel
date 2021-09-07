@@ -218,7 +218,7 @@ def main_worker(gpu, ngpus_per_node, args):
     logger = logging.getLogger(args.arch)
     logger.setLevel(logging.INFO)
     formatter = logging.Formatter('%(message)s')
-    file_handler = logging.FileHandler(args.arch+"new_losses.txt")
+    file_handler = logging.FileHandler(args.arch+"_new_losses.txt")
     file_handler.setLevel(logging.INFO)
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
