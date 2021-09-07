@@ -349,3 +349,5 @@ class ProgressMeter(object):
 
 if __name__ == '__main__':
     main()
+    print("DONE, FINISHED!!!")
+    os.system("sudo poweroff")
