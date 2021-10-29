@@ -7,7 +7,7 @@ from matplotlib.ticker import LinearLocator, FormatStrFormatter
 import numpy as np
 import warnings
 warnings.filterwarnings("ignore")
-from scipy import interpolate
+
 
 
 fig = plt.figure()
