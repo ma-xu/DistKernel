@@ -4,7 +4,7 @@
 # Author:   Kazuto Nakashima
 # URL:      http://kazuto1011.github.io
 # Created:  2017-05-18
-#   python3 main.py demo1 -i bird.jpeg -a prm23_resnet50 -t layer2
+#   python3 main.py demo1 -i A.JPEG -a new3_resnet50 -t layer2
 
 from __future__ import print_function
 
