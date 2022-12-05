@@ -128,7 +128,7 @@ def main(ctx):
 @main.command()
 @click.option("-i", "--image-paths", default={'cat1.jpg'}, type=str, multiple=True, required=True)
 @click.option("-a", "--arch", default="se_resnet50", type=click.Choice(model_names), required=True)
-@click.option("-c", "--checkpoint", default="/home/g1007540910/DistKernel/checkpoints/imagenet/", type=str, required=True)
+@click.option("-c", "--checkpoint", default="/work/smile/xuma/DistKernel/checkpoints/", type=str, required=True)
 @click.option("-t", "--target-layer", default="layer4", type=str, required=True)
 @click.option("-k", "--topk", type=int, default=1)
 @click.option("-d", "--distribute", type=int, default=1)
